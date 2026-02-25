@@ -113,6 +113,22 @@ class Package
         ]);
     }
 
+    public static function updateInstallment($parcelaId, $dataUtilizacao, $utilizado)
+    {
+        $pdo = Database::getInstance()->getConnection();
+        $stmt = $pdo->prepare("
+            UPDATE pacotes_parcelas
+            SET utilizado = :utilizado,
+                data_utilizacao = :data_utilizacao
+            WHERE id = :id
+        ");
+        return $stmt->execute([
+            ':utilizado' => $utilizado,
+            ':data_utilizacao' => $dataUtilizacao,
+            ':id' => $parcelaId,
+        ]);
+    }
+
     public static function delete($id)
     {
         $pdo = Database::getInstance()->getConnection();

@@ -24,6 +24,8 @@ class PackageController extends Controller
                 $this->handleCreate($mensagem, $erro);
             } elseif ($action === 'usar_parcela') {
                 $this->handleUseInstallment($mensagem, $erro);
+            } elseif ($action === 'editar_parcela') {
+                $this->handleEditInstallment($mensagem, $erro);
             } elseif ($action === 'excluir_pacote') {
                 $this->handleDelete($mensagem, $erro);
             }
@@ -110,6 +112,26 @@ class PackageController extends Controller
 
         Package::markInstallmentUsed($parcelaId, $dataUtilizacao);
         $mensagem = 'Parcela marcada.';
+    }
+
+    private function handleEditInstallment(&$mensagem, &$erro)
+    {
+        $parcelaId = (int) ($_POST['parcela_id'] ?? 0);
+        $acaoEdicao = $_POST['acao_edicao'] ?? ''; // 'atualizar' ou 'desmarcar'
+        $dataUtilizacao = $_POST['data_utilizacao'] ?? date('Y-m-d');
+
+        if ($parcelaId <= 0) {
+            $erro = 'Parcela inválida.';
+            return;
+        }
+
+        if ($acaoEdicao === 'desmarcar') {
+            Package::updateInstallment($parcelaId, null, 0);
+            $mensagem = 'Marcação de uso removida.';
+        } else {
+            Package::updateInstallment($parcelaId, $dataUtilizacao, 1);
+            $mensagem = 'Marcação de uso atualizada.';
+        }
     }
 
     private function handleDelete(&$mensagem, &$erro)

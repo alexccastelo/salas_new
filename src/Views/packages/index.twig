@@ -57,14 +57,40 @@
                         <td>{{ pp.data_utilizacao ? pp.data_utilizacao|date("d/m/Y") : '' }}</td>
                         <td>
                             {% if not pp.utilizado %}
-                                <form method="post" action="/pacotes?id={{ pacoteSelecionado.id }}" class="actions-form">
+                                <form method="post" action="/pacotes?id={{ pacoteSelecionado.id }}" class="actions-form" style="display:flex; gap:8px; align-items:center; margin: 0;">
                                     {{ csrfField() }}
                                     <input type="hidden" name="action" value="usar_parcela">
                                     <input type="hidden" name="parcela_id" value="{{ pp.id }}">
-                                    <button type="submit" class="btn-link">Marcar uso</button>
+                                    <input type="date" name="data_utilizacao" value="{{ "now"|date("Y-m-d") }}" required style="padding: 4px 8px; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 6px; width: 125px;">
+                                    <button type="submit" class="btn-link" style="padding: 0; color: #10b981; display: inline-flex;" title="Marcar uso">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </button>
                                 </form>
                             {% else %}
-                                -
+                                <div style="display:flex; align-items:center;">
+                                    <a href="#" id="btn-edit-{{ pp.id }}" class="btn-link" style="padding: 0; color: var(--text-muted); display: inline-flex;" onclick="document.getElementById('form-edit-{{ pp.id }}').style.display = 'flex'; this.style.display = 'none'; return false;" title="Editar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </a>
+                                    
+                                    <form id="form-edit-{{ pp.id }}" method="post" action="/pacotes?id={{ pacoteSelecionado.id }}" class="actions-form" style="display:none; gap:6px; align-items:center; margin: 0;">
+                                        {{ csrfField() }}
+                                        <input type="hidden" name="action" value="editar_parcela">
+                                        <input type="hidden" name="parcela_id" value="{{ pp.id }}">
+                                        <input type="date" name="data_utilizacao" value="{{ pp.data_utilizacao|date('Y-m-d') }}" required style="padding: 4px 6px; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 6px; width: 125px;">
+                                        
+                                        <button type="submit" name="acao_edicao" value="atualizar" class="btn-link" style="padding: 0; color: #10b981; display: inline-flex; align-items: center;" title="Salvar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </button>
+                                        
+                                        <button type="submit" name="acao_edicao" value="desmarcar" class="btn-link" style="padding: 0; color: #ef4444; display: inline-flex; align-items: center;" onclick="return confirm('Desmarcar o uso desta sessão?');" title="Desmarcar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                        </button>
+
+                                        <a href="#" class="btn-link" style="padding: 0; color: #6b7280; display: inline-flex; align-items: center;" onclick="document.getElementById('form-edit-{{ pp.id }}').style.display = 'none'; document.getElementById('btn-edit-{{ pp.id }}').style.display = 'inline-flex'; return false;" title="Cancelar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </a>
+                                    </form>
+                                </div>
                             {% endif %}
                         </td>
                     </tr>
