@@ -3,10 +3,11 @@
 // Configurações e recursos compartilhados da aplicação
 
 // Fuso horário
-date_default_timezone_set('America/Fortaleza');
+date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'America/Fortaleza');
 
 // Caminho do banco SQLite
-$dbFile = __DIR__ . '/clinica_salas.db';
+$dbName = $_ENV['DB_DATABASE'] ?? 'clinica_salas.db';
+$dbFile = __DIR__ . '/' . ltrim($dbName, '/');
 
 // Conexão PDO com SQLite
 try {
@@ -116,14 +117,14 @@ $pdo->exec("
  | Senha:  Clinica@2024!
 */
 $checkUsuarios = $pdo->query("SELECT COUNT(*) FROM usuarios")->fetchColumn();
-if ((int)$checkUsuarios === 0) {
-    $emailDefault = 'admin@clinica.local';
-    $senhaDefault = 'Clinica@2024!';
-    $hashDefault  = password_hash($senhaDefault, PASSWORD_DEFAULT);
+if ((int) $checkUsuarios === 0) {
+    $emailDefault = $_ENV['ADMIN_EMAIL'] ?? 'admin@clinica.local';
+    $senhaDefault = $_ENV['ADMIN_PASS'] ?? 'Clinica@2024!';
+    $hashDefault = password_hash($senhaDefault, PASSWORD_DEFAULT);
 
     $stmt = $pdo->prepare("INSERT INTO usuarios (email, senha_hash) VALUES (:email, :senha_hash)");
     $stmt->execute([
-        ':email'      => $emailDefault,
+        ':email' => $emailDefault,
         ':senha_hash' => $hashDefault
     ]);
 }
@@ -138,7 +139,7 @@ if ((int)$checkUsuarios === 0) {
 function calcularHorasDecimais($data, $horaInicio, $horaFim)
 {
     $inicio = new DateTime($data . ' ' . $horaInicio);
-    $fim    = new DateTime($data . ' ' . $horaFim);
+    $fim = new DateTime($data . ' ' . $horaFim);
 
     // Se o fim for menor que o início, assume que virou o dia
     if ($fim < $inicio) {
@@ -154,11 +155,16 @@ function calcularHorasDecimais($data, $horaInicio, $horaFim)
 // Valida se uma senha é "forte"
 function senhaForte($senha)
 {
-    if (strlen($senha) < 8) return false;
-    if (!preg_match('/[A-Z]/', $senha)) return false;
-    if (!preg_match('/[a-z]/', $senha)) return false;
-    if (!preg_match('/\d/', $senha))    return false;
-    if (!preg_match('/[^a-zA-Z0-9]/', $senha)) return false;
+    if (strlen($senha) < 8)
+        return false;
+    if (!preg_match('/[A-Z]/', $senha))
+        return false;
+    if (!preg_match('/[a-z]/', $senha))
+        return false;
+    if (!preg_match('/\d/', $senha))
+        return false;
+    if (!preg_match('/[^a-zA-Z0-9]/', $senha))
+        return false;
 
     return true;
 }
@@ -180,13 +186,13 @@ function usuarioTemPermissao(string $modulo): bool
         return false;
     }
 
-    $usuarioId = (int)$_SESSION['usuario_id'];
+    $usuarioId = (int) $_SESSION['usuario_id'];
 
     // Se o usuário NÃO tem nenhuma permissão cadastrada,
     // consideramos ACESSO TOTAL (modo compatibilidade).
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM usuarios_modulos WHERE usuario_id = :id");
     $stmt->execute([':id' => $usuarioId]);
-    $total = (int)$stmt->fetchColumn();
+    $total = (int) $stmt->fetchColumn();
 
     if ($total === 0) {
         return true;
@@ -199,11 +205,11 @@ function usuarioTemPermissao(string $modulo): bool
         WHERE usuario_id = :id AND modulo = :modulo
     ");
     $stmt->execute([
-        ':id'     => $usuarioId,
+        ':id' => $usuarioId,
         ':modulo' => $modulo,
     ]);
 
-    return (int)$stmt->fetchColumn() > 0;
+    return (int) $stmt->fetchColumn() > 0;
 }
 
 function exigirPermissao(string $modulo): void
@@ -216,21 +222,24 @@ function exigirPermissao(string $modulo): void
     ?>
     <!DOCTYPE html>
     <html lang="pt-br">
+
     <head>
         <meta charset="UTF-8">
         <title>Acesso negado</title>
         <link rel="stylesheet" href="style.css">
     </head>
+
     <body>
-    <?php include 'header.php'; ?>
-    <div class="container">
-        <div class="card">
-            <h1>Acesso negado</h1>
-            <p>Você não tem permissão para acessar este módulo.</p>
-            <p><a href="index.php" class="btn-secondary">Voltar ao dashboard</a></p>
+        <?php include 'header.php'; ?>
+        <div class="container">
+            <div class="card">
+                <h1>Acesso negado</h1>
+                <p>Você não tem permissão para acessar este módulo.</p>
+                <p><a href="index.php" class="btn-secondary">Voltar ao dashboard</a></p>
+            </div>
         </div>
-    </div>
     </body>
+
     </html>
     <?php
     exit;

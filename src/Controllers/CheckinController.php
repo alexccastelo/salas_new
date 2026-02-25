@@ -22,6 +22,7 @@ class CheckinController extends Controller
 
         // Handle POST actions
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            \Clinica\Helpers\Csrf::requireValidation();
             $action = $_POST['action'] ?? '';
 
             if ($action === 'novo_checkin') {

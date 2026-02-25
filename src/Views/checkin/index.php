@@ -55,7 +55,8 @@
             <!-- NOVO CHECK-IN -->
             <div class="card">
                 <h2>Novo Check-in</h2>
-                <form method="post" action="index.php?route=checkin">
+                <form method="post" action="/checkin">
+            <?php echo \Clinica\Helpers\Csrf::csrfField(); ?>
                     <input type="hidden" name="action" value="novo_checkin">
 
                     <div class="flex-col" style="margin-bottom:12px;">
@@ -122,7 +123,7 @@
                                             <?= htmlspecialchars($a['hora_checkin']) ?>
                                         </td>
                                         <td>
-                                            <form method="post" action="index.php?route=checkin"
+                                            <form method="post" action="/checkin"
                                                 style="display:flex; align-items:center; gap:8px;">
                                                 <input type="hidden" name="action" value="checkout">
                                                 <input type="hidden" name="registro_id" value="<?= $a['id'] ?>">
@@ -184,13 +185,13 @@
                 <?php if ($totalPaginas > 1): ?>
                     <div class="pagination">
                         <?php if ($paginaAtual > 1): ?>
-                            <a href="index.php?route=checkin&page=<?= $paginaAtual - 1 ?>">&laquo; Anterior</a>
+                            <a href="/checkin?page=<?= $paginaAtual - 1 ?>">&laquo; Anterior</a>
                         <?php endif; ?>
 
                         <span>Página <?= $paginaAtual ?> de <?= $totalPaginas ?></span>
 
                         <?php if ($paginaAtual < $totalPaginas): ?>
-                            <a href="index.php?route=checkin&page=<?= $paginaAtual + 1 ?>">Próximo &raquo;</a>
+                            <a href="/checkin?page=<?= $paginaAtual + 1 ?>">Próximo &raquo;</a>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>

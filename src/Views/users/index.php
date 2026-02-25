@@ -19,7 +19,7 @@
         <div class="topbar">
             <h1>Administração de Usuários</h1>
             <?php if ($usuarioEditando): ?>
-                <a href="index.php?route=usuarios" class="btn-secondary">Voltar para Novo Usuário</a>
+                <a href="\/usuarios" class="btn-secondary">Voltar para Novo Usuário</a>
             <?php endif; ?>
         </div>
 
@@ -45,7 +45,7 @@
                 <p class="info">Sua senha deve ser forte (8+ chars, números, letras maiúsc/minúsc).</p>
 
                 <form method="post"
-                    action="index.php?route=usuarios<?= $usuarioEditando ? '&edit=' . $usuarioEditando['id'] : '' ?>">
+                    action="\/usuarios<?= $usuarioEditando ? '&edit=' . $usuarioEditando['id'] : '' ?>">
                     <input type="hidden" name="action" value="<?= $usuarioEditando ? 'update' : 'create' ?>">
                     <?php if ($usuarioEditando): ?>
                         <input type="hidden" name="id" value="<?= $usuarioEditando['id'] ?>">
@@ -109,9 +109,9 @@
                                         <?= htmlspecialchars($u['email']) ?>
                                     </td>
                                     <td style="text-align:right;">
-                                        <a href="index.php?route=usuarios&edit=<?= $u['id'] ?>" class="btn-link">Editar</a>
+                                        <a href="\/usuarios?edit=<?= $u['id'] ?>" class="btn-link">Editar</a>
                                         &nbsp;|&nbsp;
-                                        <form method="post" action="index.php?route=usuarios" style="display:inline;"
+                                        <form method="post" action="\/usuarios" style="display:inline;"
                                             onsubmit="return confirm('Excluir?');">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="id" value="<?= $u['id'] ?>">

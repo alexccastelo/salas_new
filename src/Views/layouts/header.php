@@ -10,8 +10,8 @@ $canSalas = Auth::hasPermission('salas');
 $canUsuarios = Auth::hasPermission('usuarios');
 $canRelatorios = Auth::hasPermission('relatorios');
 
-$currentRoute = $_GET['route'] ?? 'dashboard';
-
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$currentRoute = trim($path, '/') ?: 'dashboard';
 // User Info
 $user = Auth::user();
 $userEmail = $user['email'] ?? 'Usuário';
@@ -31,35 +31,34 @@ $userEmail = $user['email'] ?? 'Usuário';
         </div>
 
         <nav class="main-nav">
-            <a href="index.php?route=dashboard"
-                class="<?= $currentRoute === 'dashboard' ? 'active' : '' ?>">Dashboard</a>
+            <a href="/dashboard" class="<?= $currentRoute === 'dashboard' ? 'active' : '' ?>">Dashboard</a>
 
-            <a href="<?= $canCheckin ? 'index.php?route=checkin' : '#' ?>"
+            <a href="<?= $canCheckin ? '/checkin' : '#' ?>"
                 onclick="<?= $canCheckin ? '' : "alert('Acesso negado'); return false;" ?>"
                 class="<?= $currentRoute === 'checkin' ? 'active' : '' ?>">Check-in</a>
 
-            <a href="<?= $canPacotes ? 'index.php?route=pacotes' : '#' ?>"
+            <a href="<?= $canPacotes ? '/pacotes' : '#' ?>"
                 onclick="<?= $canPacotes ? '' : "alert('Acesso negado'); return false;" ?>"
                 class="<?= $currentRoute === 'pacotes' ? 'active' : '' ?>">Pacotes</a>
 
-            <a href="<?= $canRelatorios ? 'index.php?route=relatorios' : '#' ?>"
+            <a href="<?= $canRelatorios ? '/relatorios' : '#' ?>"
                 onclick="<?= $canRelatorios ? '' : "alert('Acesso negado'); return false;" ?>"
                 class="<?= $currentRoute === 'relatorios' ? 'active' : '' ?>">Relatórios</a>
 
-            <a href="<?= $canProfissionais ? 'index.php?route=profissionais' : '#' ?>"
+            <a href="<?= $canProfissionais ? '/profissionais' : '#' ?>"
                 onclick="<?= $canProfissionais ? '' : "alert('Acesso negado'); return false;" ?>"
                 class="<?= $currentRoute === 'profissionais' ? 'active' : '' ?>">Profissionais</a>
 
-            <a href="<?= $canSalas ? 'index.php?route=salas' : '#' ?>"
+            <a href="<?= $canSalas ? '/salas' : '#' ?>"
                 onclick="<?= $canSalas ? '' : "alert('Acesso negado'); return false;" ?>"
                 class="<?= $currentRoute === 'salas' ? 'active' : '' ?>">Salas</a>
 
-            <a href="<?= $canUsuarios ? 'index.php?route=usuarios' : '#' ?>"
+            <a href="<?= $canUsuarios ? '/usuarios' : '#' ?>"
                 onclick="<?= $canUsuarios ? '' : "alert('Acesso negado'); return false;" ?>"
                 class="<?= $currentRoute === 'usuarios' ? 'active' : '' ?>">Usuários</a>
 
             <a href="#" onclick="alert('Em breve'); return false;">Configurações</a>
-            <a href="index.php?route=logout">Sair</a>
+            <a href="/logout">Sair</a>
         </nav>
     </div>
 </header>

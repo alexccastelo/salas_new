@@ -136,7 +136,7 @@
     </div>
     
     <div class="no-print" style="margin-top:20px; text-align:center;">
-        <a href="index.php?route=dashboard" class="btn-secondary">Voltar ao Dashboard</a>
+        <a href="\/dashboard" class="btn-secondary">Voltar ao Dashboard</a>
     </div>
 </main>
 </body>

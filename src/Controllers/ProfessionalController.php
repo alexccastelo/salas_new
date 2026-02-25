@@ -17,6 +17,7 @@ class ProfessionalController extends Controller
         $editando = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            \Clinica\Helpers\Csrf::requireValidation();
             $action = $_POST['action'] ?? '';
             if ($action === 'create') {
                 $this->handleCreate($mensagem, $erro);

@@ -1,0 +1,6 @@
+/vendor/
+/.env
+/*.sqlite
+/*.db
+/*.db-journal
+.DS_Store

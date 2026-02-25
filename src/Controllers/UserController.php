@@ -29,6 +29,7 @@ class UserController extends Controller
         $modulosUsuario = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            \Clinica\Helpers\Csrf::requireValidation();
             $action = $_POST['action'] ?? '';
             if ($action === 'create') {
                 $this->handleCreate($mensagem, $erro);

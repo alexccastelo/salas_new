@@ -1,0 +1,19 @@
+{
+    "name": "espaco-vital/clinica",
+    "description": "Sistema de Agendamento",
+    "type": "project",
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "authors": [
+        {
+            "name": "alexccastelo",
+            "email": "alexccastelo@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Clinica\\": "src/"
+        }
+    }
+}

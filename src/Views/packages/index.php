@@ -19,7 +19,7 @@
         <div class="topbar">
             <h1>Gestão de Pacotes</h1>
             <?php if ($pacoteSelecionado): ?>
-                <a href="index.php?route=pacotes" class="btn-secondary">Voltar para a Lista</a>
+                <a href="\/pacotes" class="btn-secondary">Voltar para a Lista</a>
             <?php endif; ?>
         </div>
 
@@ -77,7 +77,7 @@
                                 </td>
                                 <td>
                                     <?php if (!$pp['utilizado']): ?>
-                                        <form method="post" action="index.php?route=pacotes&id=<?= $pacoteSelecionado['id'] ?>"
+                                        <form method="post" action="\/pacotes?id=<?= $pacoteSelecionado['id'] ?>"
                                             class="actions-form">
                                             <input type="hidden" name="action" value="usar_parcela">
                                             <input type="hidden" name="parcela_id" value="<?= $pp['id'] ?>">
@@ -97,7 +97,8 @@
         <?php else: ?>
             <div class="card">
                 <h2>Novo Pacote</h2>
-                <form method="post" action="index.php?route=pacotes">
+                <form method="post" action="\/pacotes">
+            <?php echo \Clinica\Helpers\Csrf::csrfField(); ?>
                     <input type="hidden" name="action" value="criar_pacote">
 
                     <div class="flex-row">
@@ -202,9 +203,9 @@
                                             <?= $p['quantidade'] ?>
                                         </td>
                                         <td>
-                                            <a href="index.php?route=pacotes&id=<?= $p['id'] ?>" class="btn-link">Ver/Usar</a>
+                                            <a href="\/pacotes?id=<?= $p['id'] ?>" class="btn-link">Ver/Usar</a>
                                             &nbsp;|&nbsp;
-                                            <form method="post" action="index.php?route=pacotes" style="display:inline;"
+                                            <form method="post" action="\/pacotes" style="display:inline;"
                                                 onsubmit="return confirm('Excluir?');">
                                                 <input type="hidden" name="action" value="excluir_pacote">
                                                 <input type="hidden" name="pacote_id" value="<?= $p['id'] ?>">

@@ -12,7 +12,9 @@ class Database
 
     private function __construct()
     {
-        $dbFile = __DIR__ . '/../../clinica_salas.db';
+        $dbName = $_ENV['DB_DATABASE'] ?? 'clinica_salas.db';
+        $dbFile = __DIR__ . '/../../' . ltrim($dbName, '/');
+
         try {
             $this->pdo = new PDO('sqlite:' . $dbFile);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

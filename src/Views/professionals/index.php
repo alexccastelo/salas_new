@@ -18,7 +18,7 @@
         <div class="topbar">
             <h1>Cadastro de Profissionais</h1>
             <?php if ($editando): ?>
-                <a href="index.php?route=profissionais" class="btn-secondary">Voltar para Novo</a>
+                <a href="\/profissionais" class="btn-secondary">Voltar para Novo</a>
             <?php endif; ?>
         </div>
 
@@ -41,7 +41,7 @@
                     <?= $editando ? 'Editar Profissional' : 'Novo Profissional' ?>
                 </h2>
                 <form method="post"
-                    action="index.php?route=profissionais<?= $editando ? '&edit=' . $editando['id'] : '' ?>">
+                    action="\/profissionais<?= $editando ? '&edit=' . $editando['id'] : '' ?>">
                     <input type="hidden" name="action" value="<?= $editando ? 'update' : 'create' ?>">
                     <?php if ($editando): ?>
                         <input type="hidden" name="id" value="<?= $editando['id'] ?>">
@@ -101,7 +101,7 @@
                                         </span>
                                     </td>
                                     <td style="text-align:right;">
-                                        <a href="index.php?route=profissionais&edit=<?= $p['id'] ?>" class="btn-link">Editar</a>
+                                        <a href="\/profissionais?edit=<?= $p['id'] ?>" class="btn-link">Editar</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

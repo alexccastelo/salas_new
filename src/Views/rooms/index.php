@@ -18,7 +18,7 @@
         <div class="topbar">
             <h1>Cadastro de Salas</h1>
             <?php if ($editando): ?>
-                <a href="index.php?route=salas" class="btn-secondary">Voltar para Nova</a>
+                <a href="\/salas" class="btn-secondary">Voltar para Nova</a>
             <?php endif; ?>
         </div>
 
@@ -40,7 +40,8 @@
                 <h2>
                     <?= $editando ? 'Editar Sala' : 'Nova Sala' ?>
                 </h2>
-                <form method="post" action="index.php?route=salas<?= $editando ? '&edit=' . $editando['id'] : '' ?>">
+                <form method="post" action="\/salas<?= $editando ? '&edit=' . $editando['id'] : '' ?>">
+            <?php echo \Clinica\Helpers\Csrf::csrfField(); ?>
                     <input type="hidden" name="action" value="<?= $editando ? 'update' : 'create' ?>">
                     <?php if ($editando): ?>
                         <input type="hidden" name="id" value="<?= $editando['id'] ?>">
@@ -100,7 +101,7 @@
                                         </span>
                                     </td>
                                     <td style="text-align:right;">
-                                        <a href="index.php?route=salas&edit=<?= $s['id'] ?>" class="btn-link">Editar</a>
+                                        <a href="\/salas?edit=<?= $s['id'] ?>" class="btn-link">Editar</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

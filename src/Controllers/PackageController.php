@@ -17,6 +17,7 @@ class PackageController extends Controller
         $erro = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            \Clinica\Helpers\Csrf::requireValidation();
             $action = $_POST['action'] ?? '';
 
             if ($action === 'criar_pacote') {
