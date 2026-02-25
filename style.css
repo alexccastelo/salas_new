@@ -2,7 +2,8 @@
    PREMIUM RESET & VARS
    =========================== */
 :root {
-    --primary-color: #be123c; /* Rose 700 - replacing generic red */
+    --primary-color: #be123c;
+    /* Rose 700 - replacing generic red */
     --primary-hover: #9f1239;
     --secondary-bg: #f3f4f6;
     --text-main: #1f2937;
@@ -16,7 +17,9 @@
     --font-base: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -24,7 +27,8 @@ body {
     margin: 0;
     padding: 0;
     font-family: var(--font-base);
-    background-color: #f9fafb; /* Lighter gray */
+    background-color: #f9fafb;
+    /* Lighter gray */
     color: var(--text-main);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -106,6 +110,9 @@ a:hover {
     font-weight: 500;
     color: #4b5563;
     transition: all 0.2s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
 }
 
 .main-nav a:hover {
@@ -114,7 +121,47 @@ a:hover {
 }
 
 .main-nav a.active {
-    background-color: #fff1f2; /* Light Rose */
+    background-color: #fff1f2;
+    /* Light Rose */
+    color: var(--primary-color);
+}
+
+/* Dropdown Menu */
+.nav-item-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 160px;
+    background-color: #ffffff;
+    box-shadow: var(--shadow-md);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    z-index: 1000;
+    padding: 8px 0;
+    margin-top: 4px;
+}
+
+.nav-item-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.nav-item-dropdown .dropdown-menu a {
+    display: block;
+    padding: 10px 16px;
+    border-radius: 0;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.nav-item-dropdown .dropdown-menu a:hover {
+    background-color: #f3f4f6;
     color: var(--primary-color);
 }
 
@@ -131,7 +178,7 @@ a:hover {
     background: var(--card-bg);
     border-radius: var(--radius-md);
     padding: 24px;
-    border: 1px solid rgba(0,0,0,0.04);
+    border: 1px solid rgba(0, 0, 0, 0.04);
     box-shadow: var(--shadow-sm);
     margin-bottom: 24px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -139,7 +186,7 @@ a:hover {
 
 .card:hover {
     box-shadow: var(--shadow-md);
-    border-color: rgba(0,0,0,0.08);
+    border-color: rgba(0, 0, 0, 0.08);
 }
 
 h1 {
@@ -174,7 +221,9 @@ label {
     margin-bottom: 6px;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
     display: block;
     width: 100%;
     padding: 10px 12px;
@@ -185,7 +234,8 @@ input, select, textarea {
     border: 1px solid #d1d5db;
     border-radius: 8px;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    appearance: none; /* remove native styling */
+    appearance: none;
+    /* remove native styling */
 }
 
 /* Custom Select Arrow */
@@ -197,7 +247,9 @@ select {
     padding-right: 2.5rem;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.1);
@@ -254,7 +306,8 @@ input:focus, select:focus, textarea:focus {
     font-weight: 500;
     cursor: pointer;
     text-decoration: underline;
-    text-underline-offset: 4px; /* modern underline */
+    text-underline-offset: 4px;
+    /* modern underline */
 }
 
 .btn-link:hover {
@@ -305,18 +358,40 @@ tr:hover td {
     gap: 20px;
     flex-wrap: wrap;
 }
+
 .flex-col {
     flex: 1;
     min-width: 200px;
 }
 
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
 
 @media (max-width: 768px) {
-    .header-inner { flex-direction: column; gap: 16px; align-items: flex-start; }
-    .main-nav { flex-wrap: wrap; width: 100%; }
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .header-inner {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .main-nav {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
 }
 
 .msg-alerta {
@@ -354,4 +429,3 @@ tr:hover td {
     align-items: center;
     margin-bottom: 20px;
 }
-

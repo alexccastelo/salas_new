@@ -19,6 +19,7 @@
                 </div>
             </div>
 
+            {% if not hide_nav %}
             <div class="user-area" style="margin-left:auto; margin-right:20px; color:var(--text-muted); font-size:0.9rem;">
                 Olá, <strong>{{ session_user_email.usuario_email|default('Usuário') }}</strong>
             </div>
@@ -38,21 +39,29 @@
                     onclick="{{ permissions.relatorios ? '' : "alert('Acesso negado'); return false;" }}"
                     class="{{ currentRoute == 'relatorios' ? 'active' : '' }}">Relatórios</a>
 
-                <a href="{{ permissions.profissionais ? '/profissionais' : '#' }}"
-                    onclick="{{ permissions.profissionais ? '' : "alert('Acesso negado'); return false;" }}"
-                    class="{{ currentRoute == 'profissionais' ? 'active' : '' }}">Profissionais</a>
+                <div class="nav-item-dropdown">
+                    <a href="#" class="dropdown-toggle {{ currentRoute in ['profissionais', 'salas', 'usuarios'] ? 'active' : '' }}" onclick="return false;">
+                        Cadastros <span style="font-size: 0.8em; margin-left: 2px;">▼</span>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="{{ permissions.profissionais ? '/profissionais' : '#' }}"
+                            onclick="{{ permissions.profissionais ? '' : "alert('Acesso negado'); return false;" }}"
+                            class="{{ currentRoute == 'profissionais' ? 'active' : '' }}">Profissionais</a>
 
-                <a href="{{ permissions.salas ? '/salas' : '#' }}"
-                    onclick="{{ permissions.salas ? '' : "alert('Acesso negado'); return false;" }}"
-                    class="{{ currentRoute == 'salas' ? 'active' : '' }}">Salas</a>
+                        <a href="{{ permissions.salas ? '/salas' : '#' }}"
+                            onclick="{{ permissions.salas ? '' : "alert('Acesso negado'); return false;" }}"
+                            class="{{ currentRoute == 'salas' ? 'active' : '' }}">Salas</a>
 
-                <a href="{{ permissions.usuarios ? '/usuarios' : '#' }}"
-                    onclick="{{ permissions.usuarios ? '' : "alert('Acesso negado'); return false;" }}"
-                    class="{{ currentRoute == 'usuarios' ? 'active' : '' }}">Usuários</a>
+                        <a href="{{ permissions.usuarios ? '/usuarios' : '#' }}"
+                            onclick="{{ permissions.usuarios ? '' : "alert('Acesso negado'); return false;" }}"
+                            class="{{ currentRoute == 'usuarios' ? 'active' : '' }}">Usuários</a>
+                    </div>
+                </div>
 
                 <a href="#" onclick="alert('Em breve'); return false;">Configurações</a>
                 <a href="/logout">Sair</a>
             </nav>
+            {% endif %}
         </div>
     </header>
     {% endif %}
