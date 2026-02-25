@@ -28,8 +28,7 @@
             <?php endif; ?>
 
             <form method="post" action="/login">
-            <?php echo \Clinica\Helpers\Csrf::csrfField(); ?>
-                <?= $csrfField ?? '' ?>
+                <?= $csrfField ?? \Clinica\Helpers\Csrf::csrfField() ?>
                 <label for="email">E-mail</label>
                 <input type="email" id="email" name="email" required>
 
