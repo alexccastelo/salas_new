@@ -1,0 +1,200 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Pacotes - Espaço Vital{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Gestão de Pacotes</h1>
+    {% if pacoteSelecionado %}
+        <a href="/pacotes" class="btn-secondary">Voltar para a Lista</a>
+    {% endif %}
+</div>
+
+<!-- Feedback -->
+{% if mensagem %}
+    <div class="msg-alerta" style="background-color:#d1fae5; border-color:#10b981; color:#065f46;">
+        {{ mensagem }}
+    </div>
+{% endif %}
+
+{% if erro %}
+    <div class="msg-alerta" style="background-color:#fee2e2; border-color:#ef4444; color:#991b1b;">
+        {{ erro }}
+    </div>
+{% endif %}
+
+<!-- VIEW: DETALHES -->
+{% if pacoteSelecionado %}
+    <div class="card">
+        <h2>Detalhes Pacote #{{ pacoteSelecionado.id }}</h2>
+        <p class="info">
+            <strong>Contratante:</strong> {{ pacoteSelecionado.contratante_nome }}<br>
+            <strong>Profissional:</strong> {{ pacoteSelecionado.profissional_relacionado ? pacoteSelecionado.profissional_relacionado : '-' }} ·
+            <strong>Paciente:</strong> {{ pacoteSelecionado.paciente_relacionado ? pacoteSelecionado.paciente_relacionado : '-' }}<br>
+            <strong>Valor Total:</strong> R$ {{ pacoteSelecionado.valor_total|number_format(2, ',', '.') }}
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Utilizado?</th>
+                    <th>Data</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pp in parcelasPacote %}
+                    <tr>
+                        <td>{{ pp.numero }} ({{ pp.descricao }})</td>
+                        <td>
+                            {% if pp.utilizado %}
+                                <span style="color:green;font-weight:bold;">Sim</span>
+                            {% else %}
+                                <span style="color:#999;">Não</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ pp.data_utilizacao ? pp.data_utilizacao|date("d/m/Y") : '' }}</td>
+                        <td>
+                            {% if not pp.utilizado %}
+                                <form method="post" action="/pacotes?id={{ pacoteSelecionado.id }}" class="actions-form">
+                                    {{ csrfField() }}
+                                    <input type="hidden" name="action" value="usar_parcela">
+                                    <input type="hidden" name="parcela_id" value="{{ pp.id }}">
+                                    <button type="submit" class="btn-link">Marcar uso</button>
+                                </form>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- VIEW: LISTA & FORM -->
+{% else %}
+    <div class="card">
+        <h2>Novo Pacote</h2>
+        <form method="post" action="/pacotes">
+            {{ csrfField() }}
+            <input type="hidden" name="action" value="criar_pacote">
+
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Tipo</label>
+                    <select name="tipo">
+                        <option value="paciente">Paciente</option>
+                        <option value="profissional">Profissional</option>
+                    </select>
+                </div>
+                <div class="flex-col">
+                    <label>Contratante (Nome)</label>
+                    <input type="text" name="contratante_nome" required>
+                </div>
+            </div>
+
+            <div class="flex-row" style="margin-top:12px;">
+                <div class="flex-col">
+                    <label>Profissional Relacionado</label>
+                    <select name="profissional_relacionado">
+                        <option value="">Selecione...</option>
+                        {% for p in profissionais %}
+                            <option value="{{ p.nome }}">{{ p.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex-col">
+                    <label>Paciente Relacionado (Opcional)</label>
+                    <input type="text" name="paciente_relacionado">
+                </div>
+            </div>
+
+            <div class="flex-row" style="margin-top:12px;">
+                <div class="flex-col">
+                    <label>Qtd. Sessões/Horas</label>
+                    <input type="number" name="quantidade" min="1" required>
+                </div>
+                <div class="flex-col">
+                    <label>Valor Unitário (R$)</label>
+                    <input type="text" name="valor_unitario" placeholder="Ex: 150,00">
+                </div>
+            </div>
+
+            <div class="flex-row" style="margin-top:12px;">
+                <div class="flex-col">
+                    <label>Data Contrato</label>
+                    <input type="date" name="data_contrato" value="{{ "now"|date("Y-m-d") }}">
+                </div>
+                <div class="flex-col">
+                    <label>Data Pagamento</label>
+                    <input type="date" name="data_pagamento">
+                    <label style="margin-top:4px; font-weight:normal; font-size:0.85rem;">
+                        <input type="checkbox" name="pagamento_ao_final" value="1"
+                            style="display:inline;width:auto;"> Pagamento ao Final
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-top:16px; text-align:right;">
+                <button type="submit" class="btn-primary">Criar Pacote</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Pacotes Existentes</h2>
+        {% if pacotes is empty %}
+            <p>Nenhum pacote cadastrado.</p>
+        {% else %}
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Contratante</th>
+                            <th>Profissional</th>
+                            <th>Status Pag.</th>
+                            <th>Progresso</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pacotes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ p.contratante_nome }}</strong><br>
+                                    <small>{{ p.data_contrato|date("d/m/Y") }}</small>
+                                </td>
+                                <td>{{ p.profissional_relacionado ? p.profissional_relacionado : '-' }}</td>
+                                <td>
+                                    {% if p.pagamento_ao_final %}
+                                        <span class="status-pagamento pending" title="Pagar ao concluir todas as sessões">Ao Final</span>
+                                    {% elseif p.data_pagamento %}
+                                        <span class="status-pagamento paid" title="Pago em {{ p.data_pagamento|date('d/m/Y') }}">Pago</span>
+                                    {% else %}
+                                        <span class="status-pagamento pending">Pendente</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ p.usadas }} / {{ p.quantidade }}</td>
+                                <td>
+                                    <a href="/pacotes?id={{ p.id }}" class="btn-link">Ver/Usar</a>
+                                    &nbsp;|&nbsp;
+                                    <form method="post" action="/pacotes" style="display:inline;"
+                                        onsubmit="return confirm('Excluir?');">
+                                        {{ csrfField() }}
+                                        <input type="hidden" name="action" value="excluir_pacote">
+                                        <input type="hidden" name="pacote_id" value="{{ p.id }}">
+                                        <button type="submit" class="btn-link"
+                                            style="color:var(--text-muted);">Excluir</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
