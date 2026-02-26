@@ -101,6 +101,7 @@ a:hover {
 .main-nav {
     display: flex;
     gap: 6px;
+    align-items: center;
 }
 
 .main-nav a {
@@ -129,8 +130,7 @@ a:hover {
 /* Dropdown Menu */
 .nav-item-dropdown {
     position: relative;
-    display: inline-flex;
-    align-items: center;
+    display: block;
 }
 
 .dropdown-menu {

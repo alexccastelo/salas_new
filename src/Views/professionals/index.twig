@@ -6,7 +6,7 @@
 <div class="topbar">
     <h1>Cadastro de Profissionais</h1>
     {% if editando %}
-        <a href="/profissionais" class="btn-secondary">Voltar para Novo</a>
+        <a href="{{ base_url }}/profissionais" class="btn-secondary">Voltar para Novo</a>
     {% endif %}
 </div>
 
@@ -26,7 +26,7 @@
     <!-- FORM -->
     <div class="card">
         <h2>{{ editando ? 'Editar Profissional' : 'Novo Profissional' }}</h2>
-        <form method="post" action="/profissionais{{ editando ? '?edit=' ~ editando.id : '' }}">
+        <form method="post" action="{{ base_url }}/profissionais{{ editando ? '?edit=' ~ editando.id : '' }}">
             {{ csrfField() }}
             <input type="hidden" name="action" value="{{ editando ? 'update' : 'create' }}">
             {% if editando %}
@@ -81,7 +81,7 @@
                                 </span>
                             </td>
                             <td style="text-align:right;">
-                                <a href="/profissionais?edit={{ p.id }}" class="btn-link">Editar</a>
+                                <a href="{{ base_url }}/profissionais?edit={{ p.id }}" class="btn-link">Editar</a>
                             </td>
                         </tr>
                     {% endfor %}

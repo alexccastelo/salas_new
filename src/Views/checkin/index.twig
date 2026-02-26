@@ -41,7 +41,7 @@
     <!-- NOVO CHECK-IN -->
     <div class="card">
         <h2>Novo Check-in</h2>
-        <form method="post" action="/checkin">
+        <form method="post" action="{{ base_url }}/checkin">
             {{ csrfField() }}
             <input type="hidden" name="action" value="novo_checkin">
 
@@ -109,7 +109,7 @@
                                     {{ a.hora_checkin }}
                                 </td>
                                 <td>
-                                    <form method="post" action="/checkin"
+                                    <form method="post" action="{{ base_url }}/checkin"
                                         style="display:flex; align-items:center; gap:8px;">
                                         {{ csrfField() }}
                                         <input type="hidden" name="action" value="checkout">
@@ -172,13 +172,13 @@
         {% if totalPaginas > 1 %}
             <div class="pagination">
                 {% if paginaAtual > 1 %}
-                    <a href="/checkin?page={{ paginaAtual - 1 }}">&laquo; Anterior</a>
+                    <a href="{{ base_url }}/checkin?page={{ paginaAtual - 1 }}">&laquo; Anterior</a>
                 {% endif %}
 
                 <span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>
 
                 {% if paginaAtual < totalPaginas %}
-                    <a href="/checkin?page={{ paginaAtual + 1 }}">Próximo &raquo;</a>
+                    <a href="{{ base_url }}/checkin?page={{ paginaAtual + 1 }}">Próximo &raquo;</a>
                 {% endif %}
             </div>
         {% endif %}

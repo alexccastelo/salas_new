@@ -1,4 +1,7 @@
 <?php
+// Tenta forçar a falta de output
+ob_start();
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -32,10 +35,22 @@ echo "<br>";
 // 2. Testar sessões
 echo "Testando Sessão...<br>";
 try {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     $_SESSION['teste'] = 'OK';
     echo "Sessão iniciada e escrita: OK!<br>";
     echo "ID da Sessão: " . session_id() . "<br>";
 } catch (Exception $e) {
     echo "Erro de Sessão: " . $e->getMessage() . "<br>";
 }
+
+// Check para ver oq já foi enviado antes (bom pra achar BOM)
+$sent = headers_sent($file, $line);
+if ($sent) {
+    echo "<br><br><span style='color:red;'><strong>ATENÇÃO:</strong> Headers já foram enviados no arquivo <strong>{$file}</strong> na linha <strong>{$line}</strong>! Isso causa o erro 500 nologin.</span>";
+} else {
+    echo "<br><br><span style='color:green;'>Headers OK (Não foram enviados antes da hora).</span>";
+}
+
+ob_end_flush();

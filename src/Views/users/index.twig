@@ -6,7 +6,7 @@
 <div class="topbar">
     <h1>Administração de Usuários</h1>
     {% if usuarioEditando %}
-        <a href="/usuarios" class="btn-secondary">Voltar para Novo Usuário</a>
+        <a href="{{ base_url }}/usuarios" class="btn-secondary">Voltar para Novo Usuário</a>
     {% endif %}
 </div>
 
@@ -29,7 +29,7 @@
         <h2>{{ usuarioEditando ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
         <p class="info">Sua senha deve ser forte (8+ chars, números, letras maiúsc/minúsc).</p>
 
-        <form method="post" action="/usuarios{{ usuarioEditando ? '?edit=' ~ usuarioEditando.id : '' }}">
+        <form method="post" action="{{ base_url }}/usuarios{{ usuarioEditando ? '?edit=' ~ usuarioEditando.id : '' }}">
             {{ csrfField() }}
             <input type="hidden" name="action" value="{{ usuarioEditando ? 'update' : 'create' }}">
             {% if usuarioEditando %}
@@ -89,9 +89,9 @@
                             <td>{{ u.id }}</td>
                             <td>{{ u.email }}</td>
                             <td style="text-align:right;">
-                                <a href="/usuarios?edit={{ u.id }}" class="btn-link">Editar</a>
+                                <a href="{{ base_url }}/usuarios?edit={{ u.id }}" class="btn-link">Editar</a>
                                 &nbsp;|&nbsp;
-                                <form method="post" action="/usuarios" style="display:inline;"
+                                <form method="post" action="{{ base_url }}/usuarios" style="display:inline;"
                                     onsubmit="return confirm('Excluir?');">
                                     {{ csrfField() }}
                                     <input type="hidden" name="action" value="delete">
