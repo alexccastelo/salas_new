@@ -39,6 +39,11 @@ class Controller
             // Add current route
             $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
             self::$twig->addGlobal('currentRoute', trim($path, '/') ?: 'dashboard');
+
+            // Add base_url
+            $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+            $baseUrl = rtrim(str_replace('\\', '/', $scriptName), '/');
+            self::$twig->addGlobal('base_url', $baseUrl);
         }
         return self::$twig;
     }
@@ -56,7 +61,10 @@ class Controller
 
     protected function redirect($url)
     {
-        header("Location: {$url}");
+        $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+        $baseUrl = rtrim(str_replace('\\', '/', $scriptName), '/');
+        $url = ltrim($url, '/');
+        header("Location: {$baseUrl}/{$url}");
         exit;
     }
 
