@@ -35,10 +35,17 @@ class Router
             $path = substr($path, 0, $pos);
         }
 
-        // Se a aplicação rodar em um subdiretório ou usar o server embutido
-        // Aqui estamos simplificando, considerando que as rotas baseiam-se no request
-        // Em um PHP Built-in server, $path começa na raiz. ex: /checkin
-        // Mas o legado era localhost:8000/index.php?route=checkin
+        // Remover base path (ex: /salas_new) para manter as rotas relativas (/)
+        $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+        if ($scriptName !== '/' && $scriptName !== '\\') {
+            if (strpos($path, $scriptName) === 0) {
+                $path = substr($path, strlen($scriptName));
+            }
+        }
+
+        if (empty($path)) {
+            $path = '/';
+        }
 
         // Suporte a compatibilidade temporária com o formato ?route=...
         if (isset($_GET['route'])) {

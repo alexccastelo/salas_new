@@ -16,7 +16,7 @@ class AuthController extends Controller
 
         // Se já estiver logado, manda para o dashboard
         if (!empty($_SESSION['usuario_id'])) {
-            header('Location: /dashboard');
+            header('Location: dashboard');
             exit;
         }
 
@@ -40,7 +40,7 @@ class AuthController extends Controller
                     $_SESSION['usuario_id'] = (int) $usuario['id'];
                     $_SESSION['usuario_email'] = $usuario['email'];
 
-                    header('Location: /dashboard');
+                    header('Location: dashboard');
                     exit;
                 } else {
                     $mensagemErro = 'E-mail ou senha inválidos.';
@@ -69,7 +69,7 @@ class AuthController extends Controller
         session_unset();
         session_destroy();
 
-        header('Location: /login');
+        header('Location: login');
         exit;
     }
 }

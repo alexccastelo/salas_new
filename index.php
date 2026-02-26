@@ -1,6 +1,10 @@
 <?php
 // index.php - Main Entry Point
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Load Composer AutoLoader
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -24,7 +28,9 @@ $router = new Router();
 
 // Rota padrão
 $router->get('/', function () {
-    header('Location: /dashboard');
+    $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+    $baseUrl = rtrim(str_replace('\\', '/', $scriptName), '/');
+    header("Location: {$baseUrl}/dashboard");
     exit;
 });
 
