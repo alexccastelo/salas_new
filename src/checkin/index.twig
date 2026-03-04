@@ -1,0 +1,187 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Check-in - Espaço Vital{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Controle de Check-in / Check-out</h1>
+    <div class="topbar-actions">
+        <!-- Actions if needed -->
+    </div>
+</div>
+
+<!-- Feedback Messages -->
+{% if mensagemSistema %}
+    <div class="msg-alerta" style="background-color:#d1fae5; border-color:#10b981; color:#065f46;">
+        {{ mensagemSistema }}
+    </div>
+{% endif %}
+
+{% if erro %}
+    <div class="msg-alerta" style="background-color:#fee2e2; border-color:#ef4444; color:#991b1b;">
+        {{ erro }}
+    </div>
+{% endif %}
+
+{% if mensagemWhatsApp %}
+    <div class="card">
+        <h2>Mensagem para WhatsApp</h2>
+        <p class="info">Copie a mensagem abaixo:</p>
+        <div style="position:relative;">
+            <textarea id="whatsappMsg" readonly rows="5"
+                style="background:#f9fafb;">{{ mensagemWhatsApp }}</textarea>
+            <button type="button" class="btn-secondary"
+                onclick="navigator.clipboard.writeText(document.getElementById('whatsappMsg').value); alert('Copiado!');"
+                style="position:absolute; bottom:10px; right:10px;">Copiar</button>
+        </div>
+    </div>
+{% endif %}
+
+<div class="grid-2">
+    <!-- NOVO CHECK-IN -->
+    <div class="card">
+        <h2>Novo Check-in</h2>
+        <form method="post" action="{{ base_url }}/checkin">
+            {{ csrfField() }}
+            <input type="hidden" name="action" value="novo_checkin">
+
+            <div class="flex-col" style="margin-bottom:12px;">
+                <label for="profissional_id">Profissional</label>
+                <select id="profissional_id" name="profissional_id" required>
+                    <option value="">Selecione...</option>
+                    {% for p in profissionais %}
+                        <option value="{{ p.id }}">{{ p.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex-col" style="margin-bottom:12px;">
+                <label for="sala_id">Sala</label>
+                <select id="sala_id" name="sala_id" required>
+                    <option value="">Selecione...</option>
+                    {% for s in salas %}
+                        <option value="{{ s.id }}">{{ s.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" name="data" value="{{ "now"|date("Y-m-d") }}">
+                </div>
+                <div class="flex-col">
+                    <label for="hora_checkin">Hora</label>
+                    <input type="time" id="hora_checkin" name="hora_checkin" value="{{ "now"|date("H:i") }}">
+                </div>
+            </div>
+
+            <div style="margin-top:20px; text-align:right;">
+                <button type="submit" class="btn-primary">Registrar Check-in</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- CHECK-INS EM ABERTO -->
+    <div class="card">
+        <h2>Check-ins em Aberto</h2>
+        {% if abertos is empty %}
+            <p class="info">Nenhum uso em andamento no momento.</p>
+        {% else %}
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Profissional / Sala</th>
+                            <th>Início</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in abertos %}
+                            <tr>
+                                <td>
+                                    <strong>{{ a.profissional }}</strong><br>
+                                    <small>{{ a.sala }}</small>
+                                </td>
+                                <td>
+                                    {{ a.data|date("d/m/Y") }}<br>
+                                    {{ a.hora_checkin }}
+                                </td>
+                                <td>
+                                    <form method="post" action="{{ base_url }}/checkin"
+                                        style="display:flex; align-items:center; gap:8px;">
+                                        {{ csrfField() }}
+                                        <input type="hidden" name="action" value="checkout">
+                                        <input type="hidden" name="registro_id" value="{{ a.id }}">
+
+                                        <input type="time" name="hora_checkout" value="{{ "now"|date("H:i") }}" required
+                                            style="padding:4px; border:1px solid #ccc; border-radius:4px;">
+
+                                        <button type="submit" class="btn-link"
+                                            onclick="return confirm('Confirmar check-out?');">Check-out</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- FINALIZADOS -->
+<div class="card" style="margin-top:16px;">
+    <h2>Últimos Finalizados</h2>
+    {% if finalizados is empty %}
+        <p class="info">Nenhum registro finalizado.</p>
+    {% else %}
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Profissional</th>
+                        <th>Sala</th>
+                        <th>Entrada</th>
+                        <th>Saída</th>
+                        <th>Total (h)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in finalizados %}
+                        <tr>
+                            <td>{{ r.data|date("d/m/Y") }}</td>
+                            <td>{{ r.profissional }}</td>
+                            <td>{{ r.sala }}</td>
+                            <td>{{ r.hora_checkin }}</td>
+                            <td>{{ r.hora_checkout }}</td>
+                            <td>
+                                {{ r.total_horas is not null
+                                    ? r.total_horas|number_format(2, ',', '')
+                                    : '-' }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if totalPaginas > 1 %}
+            <div class="pagination">
+                {% if paginaAtual > 1 %}
+                    <a href="{{ base_url }}/checkin?page={{ paginaAtual - 1 }}">&laquo; Anterior</a>
+                {% endif %}
+
+                <span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>
+
+                {% if paginaAtual < totalPaginas %}
+                    <a href="{{ base_url }}/checkin?page={{ paginaAtual + 1 }}">Próximo &raquo;</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Usuários - Espaço Vital{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Administração de Usuários</h1>
+    {% if usuarioEditando %}
+        <a href="{{ base_url }}/usuarios" class="btn-secondary">Voltar para Novo Usuário</a>
+    {% endif %}
+</div>
+
+<!-- Feedback -->
+{% if mensagem %}
+    <div class="msg-alerta" style="background-color:#d1fae5; border-color:#10b981; color:#065f46;">
+        {{ mensagem }}
+    </div>
+{% endif %}
+
+{% if erro %}
+    <div class="msg-alerta" style="background-color:#fee2e2; border-color:#ef4444; color:#991b1b;">
+        {{ erro }}
+    </div>
+{% endif %}
+
+<div class="grid-2">
+    <!-- FORM -->
+    <div class="card">
+        <h2>{{ usuarioEditando ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
+        <p class="info">Sua senha deve ser forte (8+ chars, números, letras maiúsc/minúsc).</p>
+
+        <form method="post" action="{{ base_url }}/usuarios{{ usuarioEditando ? '?edit=' ~ usuarioEditando.id : '' }}">
+            {{ csrfField() }}
+            <input type="hidden" name="action" value="{{ usuarioEditando ? 'update' : 'create' }}">
+            {% if usuarioEditando %}
+                <input type="hidden" name="id" value="{{ usuarioEditando.id }}">
+            {% endif %}
+
+            <div class="flex-col" style="margin-bottom:12px;">
+                <label>E-mail</label>
+                <input type="email" name="email" required value="{{ usuarioEditando.email|default('') }}">
+            </div>
+
+            <div class="flex-col" style="margin-bottom:12px;">
+                <label>
+                    {{ usuarioEditando ? 'Nova Senha (deixe em branco para manter)' : 'Senha' }}
+                </label>
+                <input type="password" name="senha" {{ usuarioEditando ? '' : 'required' }}>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="margin-bottom:8px;">Permissões de Acesso</label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    {% for slug, label in modulosDisponiveis %}
+                        <label style="display:flex; gap:8px; align-items:center; font-weight:normal;">
+                            <input type="checkbox" name="modulos[]" value="{{ slug }}"
+                                style="width:auto; margin:0;" {{ slug in modulosUsuario ? 'checked' : '' }}>
+                            {{ label }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div style="text-align:right;">
+                <button type="submit" class="btn-primary">
+                    {{ usuarioEditando ? 'Salvar Alterações' : 'Criar Usuário' }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- LIST -->
+    <div class="card">
+        <h2>Usuários Cadastrados</h2>
+        {% if usuarios is empty %}
+            <p class="info">Nenhum registro.</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>E-mail</th>
+                        <th style="text-align:right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in usuarios %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>{{ u.email }}</td>
+                            <td style="text-align:right;">
+                                <a href="{{ base_url }}/usuarios?edit={{ u.id }}" class="btn-link">Editar</a>
+                                &nbsp;|&nbsp;
+                                <form method="post" action="{{ base_url }}/usuarios" style="display:inline;"
+                                    onsubmit="return confirm('Excluir?');">
+                                    {{ csrfField() }}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="{{ u.id }}">
+                                    <button type="submit" class="btn-link"
+                                        style="color:var(--text-muted);">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

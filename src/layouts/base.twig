@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Espaço Vital Clínica{% endblock %}</title>
+    <link rel="stylesheet" href="{{ base_url }}/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    {% if not hide_header %}
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <img src="{{ base_url }}/img/logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+                <div class="logo-text">
+                    <span class="system-name">Espaço Vital</span>
+                    <span class="system-subtitle">Sistema de Gestão</span>
+                </div>
+            </div>
+
+            {% if not hide_nav %}
+            <div class="user-area" style="margin-left:auto; margin-right:20px; color:var(--text-muted); font-size:0.9rem;">
+                Olá, <strong>{{ session_user_email.usuario_email|default('Usuário') }}</strong>
+            </div>
+
+            <nav class="main-nav">
+                <a href="{{ base_url }}/dashboard" class="{{ currentRoute == 'dashboard' ? 'active' : '' }}">Dashboard</a>
+
+                <a href="{{ permissions.checkin ? base_url ~ '/checkin' : '#' }}"
+                    onclick="{{ permissions.checkin ? '' : "alert('Acesso negado'); return false;" }}"
+                    class="{{ currentRoute == 'checkin' ? 'active' : '' }}">Check-in</a>
+
+                <a href="{{ permissions.pacotes ? base_url ~ '/pacotes' : '#' }}"
+                    onclick="{{ permissions.pacotes ? '' : "alert('Acesso negado'); return false;" }}"
+                    class="{{ currentRoute == 'pacotes' ? 'active' : '' }}">Pacotes</a>
+
+                <a href="{{ permissions.relatorios ? base_url ~ '/relatorios' : '#' }}"
+                    onclick="{{ permissions.relatorios ? '' : "alert('Acesso negado'); return false;" }}"
+                    class="{{ currentRoute == 'relatorios' ? 'active' : '' }}">Relatórios</a>
+
+                <div class="nav-item-dropdown">
+                    <a href="#" class="dropdown-toggle {{ currentRoute in ['profissionais', 'salas', 'usuarios'] ? 'active' : '' }}" onclick="return false;">
+                        Cadastros <span style="font-size: 0.8em; margin-left: 2px;">▼</span>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="{{ permissions.profissionais ? base_url ~ '/profissionais' : '#' }}"
+                            onclick="{{ permissions.profissionais ? '' : "alert('Acesso negado'); return false;" }}"
+                            class="{{ currentRoute == 'profissionais' ? 'active' : '' }}">Profissionais</a>
+
+                        <a href="{{ permissions.salas ? base_url ~ '/salas' : '#' }}"
+                            onclick="{{ permissions.salas ? '' : "alert('Acesso negado'); return false;" }}"
+                            class="{{ currentRoute == 'salas' ? 'active' : '' }}">Salas</a>
+
+                        <a href="{{ permissions.usuarios ? base_url ~ '/usuarios' : '#' }}"
+                            onclick="{{ permissions.usuarios ? '' : "alert('Acesso negado'); return false;" }}"
+                            class="{{ currentRoute == 'usuarios' ? 'active' : '' }}">Usuários</a>
+                    </div>
+                </div>
+
+                <a href="#" onclick="alert('Em breve'); return false;">Configurações</a>
+                <a href="{{ base_url }}/logout">Sair</a>
+            </nav>
+            {% endif %}
+        </div>
+    </header>
+    {% endif %}
+
+    {% block body %}
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    {% endblock %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

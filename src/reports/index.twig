@@ -1,0 +1,134 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Relatório de Uso - Espaço Vital{% endblock %}
+
+{% block head %}
+<style>
+    /* Print Specifics to override some 'premium' styles for clarity on paper */
+    @media print {
+        .no-print { display: none !important; }
+        body { background: white; }
+        .card { box-shadow: none; border: 1px solid #ccc; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="topbar">
+        <h1>Relatório de Uso de Salas</h1>
+        <button type="button" class="btn-primary no-print" onclick="window.print();">Imprimir / Salvar PDF</button>
+    </div>
+
+    <div class="no-print info" style="margin-bottom:16px;">
+        Este relatório é otimizado para impressão. Utilize a função de impressão do seu navegador.
+    </div>
+
+    <p class="info">
+        <strong>Período:</strong> {{ data_inicio|date("d/m/Y") }} a {{ data_fim|date("d/m/Y") }}<br>
+        <strong>Profissional:</strong> {{ profNome ? profNome : 'Todos' }} · 
+        <strong>Sala:</strong> {{ salaNome ? salaNome : 'Todas' }}
+    </p>
+
+    <h2 style="margin-top:20px; color:var(--primary-color);">Total Geral: {{ totalGeral|number_format(2, ',', '') }} horas</h2>
+</div>
+
+<!-- Summaries Grid -->
+<div class="grid-3">
+    <div class="card">
+        <h3>Por Dia</h3>
+        {% if resumoDia is empty %}
+            <p class="info">Sem dados.</p>
+        {% else %}
+            <table>
+                <thead><tr><th>Data</th><th>Horas</th></tr></thead>
+                <tbody>
+                    {% for r in resumoDia %}
+                        <tr>
+                            <td>{{ r.data|date("d/m/Y") }}</td>
+                            <td>{{ r.horas_total|number_format(2, ',', '') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Por Profissional</h3>
+        {% if resumoProf is empty %}
+            <p class="info">Sem dados.</p>
+        {% else %}
+            <table>
+                <thead><tr><th>Nome</th><th>Horas</th></tr></thead>
+                <tbody>
+                    {% for r in resumoProf %}
+                        <tr>
+                            <td>{{ r.profissional }}</td>
+                            <td>{{ r.horas_total|number_format(2, ',', '') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Por Sala</h3>
+        {% if resumoSala is empty %}
+            <p class="info">Sem dados.</p>
+        {% else %}
+            <table>
+                <thead><tr><th>Sala</th><th>Horas</th></tr></thead>
+                <tbody>
+                    {% for r in resumoSala %}
+                        <tr>
+                            <td>{{ r.sala }}</td>
+                            <td>{{ r.horas_total|number_format(2, ',', '') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Detailed List -->
+<div class="card">
+    <h3>Detalhamento dos Registros</h3>
+    {% if detalhes is empty %}
+        <p class="info">Nenhum registro encontrado.</p>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Profissional</th>
+                    <th>Sala</th>
+                    <th>Entrada</th>
+                    <th>Saída</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in detalhes %}
+                    <tr>
+                        <td>{{ row.data|date("d/m/Y") }}</td>
+                        <td>{{ row.profissional }}</td>
+                        <td>{{ row.sala }}</td>
+                        <td>{{ row.hora_checkin }}</td>
+                        <td>{{ row.hora_checkout }}</td>
+                        <td>
+                            {{ row.total_horas is not null ? row.total_horas|number_format(2, ',', '') : '-' }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+
+<div class="no-print" style="margin-top:20px; text-align:center;">
+    <a href="{{ base_url }}/dashboard" class="btn-secondary">Voltar ao Dashboard</a>
+</div>
+{% endblock %}

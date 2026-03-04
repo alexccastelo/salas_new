@@ -1,0 +1,93 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Salas - Espaço Vital{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Cadastro de Salas</h1>
+    {% if editando %}
+        <a href="{{ base_url }}/salas" class="btn-secondary">Voltar para Nova</a>
+    {% endif %}
+</div>
+
+{% if mensagem %}
+    <div class="msg-alerta" style="background-color:#d1fae5; border-color:#10b981; color:#065f46;">
+        {{ mensagem }}
+    </div>
+{% endif %}
+
+{% if erro %}
+    <div class="msg-alerta" style="background-color:#fee2e2; border-color:#ef4444; color:#991b1b;">
+        {{ erro }}
+    </div>
+{% endif %}
+
+<div class="grid-2">
+    <!-- FORM -->
+    <div class="card">
+        <h2>{{ editando ? 'Editar Sala' : 'Nova Sala' }}</h2>
+        <form method="post" action="{{ base_url }}/salas{{ editando ? '?edit=' ~ editando.id : '' }}">
+            {{ csrfField() }}
+            <input type="hidden" name="action" value="{{ editando ? 'update' : 'create' }}">
+            {% if editando %}
+                <input type="hidden" name="id" value="{{ editando.id }}">
+            {% endif %}
+
+            <div class="flex-col" style="margin-bottom:12px;">
+                <label>Nome da Sala</label>
+                <input type="text" name="nome" required value="{{ editando.nome|default('') }}">
+            </div>
+
+            {% if editando %}
+                <div style="margin-bottom:12px;">
+                    <label style="display:flex; gap:8px; align-items:center;">
+                        <input type="checkbox" name="ativo" style="width:auto; margin:0;" {{ editando.ativo ? 'checked' : '' }}>
+                        Ativa
+                    </label>
+                </div>
+            {% endif %}
+
+            <div style="text-align:right;">
+                <button type="submit" class="btn-primary">
+                    {{ editando ? 'Salvar Alterações' : 'Cadastrar' }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- LIST -->
+    <div class="card">
+        <h2>Salas Cadastradas</h2>
+        {% if salas is empty %}
+            <p class="info">Nenhum registro.</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in salas %}
+                        <tr style="{{ s.ativo ? '' : 'opacity:0.6;' }}">
+                            <td>{{ s.id }}</td>
+                            <td>{{ s.nome }}</td>
+                            <td>
+                                <span style="font-size:0.8rem; padding:2px 6px; border-radius:4px; background:{{ s.ativo ? '#d1fae5' : '#f3f4f6' }}; color:{{ s.ativo ? '#065f46' : '#6b7280' }};">
+                                    {{ s.ativo ? 'Ativa' : 'Inativa' }}
+                                </span>
+                            </td>
+                            <td style="text-align:right;">
+                                <a href="{{ base_url }}/salas?edit={{ s.id }}" class="btn-link">Editar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

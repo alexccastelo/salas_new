@@ -1,0 +1,137 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Dashboard - Espaço Vital{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<!-- FILTROS -->
+<div class="card">
+    <h2>Filtros</h2>
+    <form method="get" action="{{ base_url }}/dashboard">
+        <div class="flex-row">
+            <div class="flex-col">
+                <label>Data Início</label>
+                <input type="date" name="data_inicio" value="{{ data_inicio }}">
+            </div>
+            <div class="flex-col">
+                <label>Data Fim</label>
+                <input type="date" name="data_fim" value="{{ data_fim }}">
+            </div>
+            <div class="flex-col">
+                <label>Profissional</label>
+                <select name="profissional_id">
+                    <option value="0">(Todos)</option>
+                    {% for p in profissionais %}
+                        <option value="{{ p.id }}" {{ profissional_id == p.id ? 'selected' : '' }}>
+                            {{ p.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex-col">
+                <label>Sala</label>
+                <select name="sala_id">
+                    <option value="0">(Todas)</option>
+                    {% for s in salas %}
+                        <option value="{{ s.id }}" {{ sala_id == s.id ? 'selected' : '' }}>
+                            {{ s.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-top:16px; display:flex; gap:10px;">
+            <button type="submit" class="btn-primary">Filtrar</button>
+            <button type="submit" name="export" value="csv" class="btn-secondary">Exportar CSV</button>
+        </div>
+    </form>
+</div>
+
+<!-- TOTAL GERAL -->
+<div class="card">
+    <h2>Resumo Geral</h2>
+    <p class="info">Total de horas no período filtrado.</p>
+    <p class="kpi-value" style="font-size: 2rem; color: var(--primary-color);">
+        {{ totalGeral|number_format(2, ',', '') }} h
+    </p>
+</div>
+
+<div class="grid-3">
+    <!-- POR DIA -->
+    <div class="card">
+        <h2>Por Dia</h2>
+        {% if resumoDia is empty %}
+            <p>Sem dados.</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>H</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resumoDia %}
+                        <tr>
+                            <td>{{ r.data|date("d/m/Y") }}</td>
+                            <td>{{ r.horas_total|number_format(2, ',', '') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+    <!-- POR PROFISSIONAL -->
+    <div class="card">
+        <h2>Por Profissional</h2>
+        {% if resumoProf is empty %}
+            <p>Sem dados.</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>H</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resumoProf %}
+                        <tr>
+                            <td>{{ r.profissional }}</td>
+                            <td>{{ r.horas_total|number_format(2, ',', '') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+    <!-- POR SALA -->
+    <div class="card">
+        <h2>Por Sala</h2>
+        {% if resumoSala is empty %}
+            <p>Sem dados.</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sala</th>
+                        <th>H</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resumoSala %}
+                        <tr>
+                            <td>{{ r.sala }}</td>
+                            <td>{{ r.horas_total|number_format(2, ',', '') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

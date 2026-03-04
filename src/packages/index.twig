@@ -1,0 +1,226 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Pacotes - Espaço Vital{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Gestão de Pacotes</h1>
+    {% if pacoteSelecionado %}
+        <a href="{{ base_url }}/pacotes" class="btn-secondary">Voltar para a Lista</a>
+    {% endif %}
+</div>
+
+<!-- Feedback -->
+{% if mensagem %}
+    <div class="msg-alerta" style="background-color:#d1fae5; border-color:#10b981; color:#065f46;">
+        {{ mensagem }}
+    </div>
+{% endif %}
+
+{% if erro %}
+    <div class="msg-alerta" style="background-color:#fee2e2; border-color:#ef4444; color:#991b1b;">
+        {{ erro }}
+    </div>
+{% endif %}
+
+<!-- VIEW: DETALHES -->
+{% if pacoteSelecionado %}
+    <div class="card">
+        <h2>Detalhes Pacote #{{ pacoteSelecionado.id }}</h2>
+        <p class="info">
+            <strong>Contratante:</strong> {{ pacoteSelecionado.contratante_nome }}<br>
+            <strong>Profissional:</strong> {{ pacoteSelecionado.profissional_relacionado ? pacoteSelecionado.profissional_relacionado : '-' }} ·
+            <strong>Paciente:</strong> {{ pacoteSelecionado.paciente_relacionado ? pacoteSelecionado.paciente_relacionado : '-' }}<br>
+            <strong>Valor Total:</strong> R$ {{ pacoteSelecionado.valor_total|number_format(2, ',', '.') }}
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Utilizado?</th>
+                    <th>Data</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pp in parcelasPacote %}
+                    <tr>
+                        <td>{{ pp.numero }} ({{ pp.descricao }})</td>
+                        <td>
+                            {% if pp.utilizado %}
+                                <span style="color:green;font-weight:bold;">Sim</span>
+                            {% else %}
+                                <span style="color:#999;">Não</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ pp.data_utilizacao ? pp.data_utilizacao|date("d/m/Y") : '' }}</td>
+                        <td>
+                            {% if not pp.utilizado %}
+                                <form method="post" action="{{ base_url }}/pacotes?id={{ pacoteSelecionado.id }}" class="actions-form" style="display:flex; gap:8px; align-items:center; margin: 0;">
+                                    {{ csrfField() }}
+                                    <input type="hidden" name="action" value="usar_parcela">
+                                    <input type="hidden" name="parcela_id" value="{{ pp.id }}">
+                                    <input type="date" name="data_utilizacao" value="{{ "now"|date("Y-m-d") }}" required style="padding: 4px 8px; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 6px; width: 125px;">
+                                    <button type="submit" class="btn-link" style="padding: 0; color: #10b981; display: inline-flex;" title="Marcar uso">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <div style="display:flex; align-items:center;">
+                                    <a href="#" id="btn-edit-{{ pp.id }}" class="btn-link" style="padding: 0; color: var(--text-muted); display: inline-flex;" onclick="document.getElementById('form-edit-{{ pp.id }}').style.display = 'flex'; this.style.display = 'none'; return false;" title="Editar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </a>
+                                    
+                                    <form id="form-edit-{{ pp.id }}" method="post" action="{{ base_url }}/pacotes?id={{ pacoteSelecionado.id }}" class="actions-form" style="display:none; gap:6px; align-items:center; margin: 0;">
+                                        {{ csrfField() }}
+                                        <input type="hidden" name="action" value="editar_parcela">
+                                        <input type="hidden" name="parcela_id" value="{{ pp.id }}">
+                                        <input type="date" name="data_utilizacao" value="{{ pp.data_utilizacao|date('Y-m-d') }}" required style="padding: 4px 6px; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 6px; width: 125px;">
+                                        
+                                        <button type="submit" name="acao_edicao" value="atualizar" class="btn-link" style="padding: 0; color: #10b981; display: inline-flex; align-items: center;" title="Salvar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </button>
+                                        
+                                        <button type="submit" name="acao_edicao" value="desmarcar" class="btn-link" style="padding: 0; color: #ef4444; display: inline-flex; align-items: center;" onclick="return confirm('Desmarcar o uso desta sessão?');" title="Desmarcar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                        </button>
+
+                                        <a href="#" class="btn-link" style="padding: 0; color: #6b7280; display: inline-flex; align-items: center;" onclick="document.getElementById('form-edit-{{ pp.id }}').style.display = 'none'; document.getElementById('btn-edit-{{ pp.id }}').style.display = 'inline-flex'; return false;" title="Cancelar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </a>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- VIEW: LISTA & FORM -->
+{% else %}
+    <div class="card">
+        <h2>Novo Pacote</h2>
+        <form method="post" action="{{ base_url }}/pacotes">
+            {{ csrfField() }}
+            <input type="hidden" name="action" value="criar_pacote">
+
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Tipo</label>
+                    <select name="tipo">
+                        <option value="paciente">Paciente</option>
+                        <option value="profissional">Profissional</option>
+                    </select>
+                </div>
+                <div class="flex-col">
+                    <label>Contratante (Nome)</label>
+                    <input type="text" name="contratante_nome" required>
+                </div>
+            </div>
+
+            <div class="flex-row" style="margin-top:12px;">
+                <div class="flex-col">
+                    <label>Profissional Relacionado</label>
+                    <select name="profissional_relacionado">
+                        <option value="">Selecione...</option>
+                        {% for p in profissionais %}
+                            <option value="{{ p.nome }}">{{ p.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex-col">
+                    <label>Paciente Relacionado (Opcional)</label>
+                    <input type="text" name="paciente_relacionado">
+                </div>
+            </div>
+
+            <div class="flex-row" style="margin-top:12px;">
+                <div class="flex-col">
+                    <label>Qtd. Sessões/Horas</label>
+                    <input type="number" name="quantidade" min="1" required>
+                </div>
+                <div class="flex-col">
+                    <label>Valor Unitário (R$)</label>
+                    <input type="text" name="valor_unitario" placeholder="Ex: 150,00">
+                </div>
+            </div>
+
+            <div class="flex-row" style="margin-top:12px;">
+                <div class="flex-col">
+                    <label>Data Contrato</label>
+                    <input type="date" name="data_contrato" value="{{ "now"|date("Y-m-d") }}">
+                </div>
+                <div class="flex-col">
+                    <label>Data Pagamento</label>
+                    <input type="date" name="data_pagamento">
+                    <label style="margin-top:4px; font-weight:normal; font-size:0.85rem;">
+                        <input type="checkbox" name="pagamento_ao_final" value="1"
+                            style="display:inline;width:auto;"> Pagamento ao Final
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-top:16px; text-align:right;">
+                <button type="submit" class="btn-primary">Criar Pacote</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Pacotes Existentes</h2>
+        {% if pacotes is empty %}
+            <p>Nenhum pacote cadastrado.</p>
+        {% else %}
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Contratante</th>
+                            <th>Profissional</th>
+                            <th>Status Pag.</th>
+                            <th>Progresso</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pacotes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ p.contratante_nome }}</strong><br>
+                                    <small>{{ p.data_contrato|date("d/m/Y") }}</small>
+                                </td>
+                                <td>{{ p.profissional_relacionado ? p.profissional_relacionado : '-' }}</td>
+                                <td>
+                                    {% if p.pagamento_ao_final %}
+                                        <span class="status-pagamento pending" title="Pagar ao concluir todas as sessões">Ao Final</span>
+                                    {% elseif p.data_pagamento %}
+                                        <span class="status-pagamento paid" title="Pago em {{ p.data_pagamento|date('d/m/Y') }}">Pago</span>
+                                    {% else %}
+                                        <span class="status-pagamento pending">Pendente</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ p.usadas }} / {{ p.quantidade }}</td>
+                                <td>
+                                    <a href="{{ base_url }}/pacotes?id={{ p.id }}" class="btn-link">Ver/Usar</a>
+                                    &nbsp;|&nbsp;
+                                    <form method="post" action="{{ base_url }}/pacotes" style="display:inline;"
+                                        onsubmit="return confirm('Excluir?');">
+                                        {{ csrfField() }}
+                                        <input type="hidden" name="action" value="excluir_pacote">
+                                        <input type="hidden" name="pacote_id" value="{{ p.id }}">
+                                        <button type="submit" class="btn-link"
+                                            style="color:var(--text-muted);">Excluir</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
