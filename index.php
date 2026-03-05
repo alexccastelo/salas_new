@@ -46,6 +46,10 @@ $router->get('/dashboard', [\Clinica\Controllers\DashboardController::class, 'in
 $router->get('/checkin', [\Clinica\Controllers\CheckinController::class, 'index']);
 $router->post('/checkin', [\Clinica\Controllers\CheckinController::class, 'index']);
 
+// Agenda
+$router->get('/agenda', [\Clinica\Controllers\AppointmentController::class, 'index']);
+$router->post('/agenda', [\Clinica\Controllers\AppointmentController::class, 'index']);
+
 // Pacotes
 $router->get('/pacotes', [\Clinica\Controllers\PackageController::class, 'index']);
 $router->post('/pacotes', [\Clinica\Controllers\PackageController::class, 'index']);

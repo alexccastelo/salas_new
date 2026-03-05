@@ -27,6 +27,7 @@ class Controller
                 // Add permissions
                 $permissions = [
                     'checkin' => \Clinica\Core\Auth::hasPermission('checkin'),
+                    'agenda' => \Clinica\Core\Auth::hasPermission('agenda'),
                     'pacotes' => \Clinica\Core\Auth::hasPermission('pacotes'),
                     'profissionais' => \Clinica\Core\Auth::hasPermission('profissionais'),
                     'salas' => \Clinica\Core\Auth::hasPermission('salas'),

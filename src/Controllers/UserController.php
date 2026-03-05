@@ -11,6 +11,7 @@ class UserController extends Controller
     private $modulosDisponiveis = [
         'dashboard' => 'Dashboard',
         'checkin' => 'Check-in',
+        'agenda' => 'Agenda',
         'registros' => 'Registros',
         'pacotes' => 'Pacotes',
         'relatorios' => 'Relatórios',

@@ -27,6 +27,10 @@
             <nav class="main-nav">
                 <a href="{{ base_url }}/dashboard" class="{{ currentRoute == 'dashboard' ? 'active' : '' }}">Dashboard</a>
 
+                <a href="{{ permissions.agenda ? base_url ~ '/agenda' : '#' }}"
+                    onclick="{{ permissions.agenda ? '' : "alert('Acesso negado'); return false;" }}"
+                    class="{{ currentRoute == 'agenda' ? 'active' : '' }}">Agenda</a>
+
                 <a href="{{ permissions.checkin ? base_url ~ '/checkin' : '#' }}"
                     onclick="{{ permissions.checkin ? '' : "alert('Acesso negado'); return false;" }}"
                     class="{{ currentRoute == 'checkin' ? 'active' : '' }}">Check-in</a>

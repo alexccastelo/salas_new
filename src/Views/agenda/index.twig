@@ -1,0 +1,398 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Agenda - Espaço Vital{% endblock %}
+
+{% block head %}
+<style>
+/* ── Agenda Layout ── */
+.agenda-wrapper { display: flex; flex-direction: column; gap: 16px; }
+
+.agenda-toolbar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: #fff; border: 1px solid var(--border-color);
+    border-radius: var(--radius-md); padding: 14px 20px;
+    box-shadow: var(--shadow-sm);
+}
+.agenda-toolbar h2 { margin: 0; font-size: 1rem; flex:1; }
+
+.agenda-nav { display: flex; gap: 6px; align-items: center; }
+.agenda-nav a, .agenda-nav button {
+    padding: 6px 14px; border-radius: var(--radius-full);
+    border: 1px solid var(--border-color); background: #fff;
+    font-size: 0.85rem; font-weight: 500; color: #374151;
+    cursor: pointer; transition: all 0.15s; text-decoration: none;
+}
+.agenda-nav a:hover, .agenda-nav button:hover { background:#f3f4f6; }
+.agenda-nav .btn-primary { border:none; color:#fff; }
+
+.filter-select {
+    padding: 6px 32px 6px 12px; border-radius: var(--radius-full);
+    border: 1px solid var(--border-color); font-size: 0.85rem;
+    background-color: #fff; cursor: pointer;
+}
+
+/* ── Grade Semanal ── */
+.agenda-grid-wrapper {
+    background: #fff; border:1px solid var(--border-color);
+    border-radius: var(--radius-md); overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.agenda-grid {
+    display: grid;
+    grid-template-columns: 56px repeat(7, 1fr);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Cabeçalho dos dias */
+.agenda-day-header {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 56px repeat(7, 1fr);
+    border-bottom: 2px solid var(--border-color);
+    background: #f9fafb;
+}
+.agenda-day-header .day-label {
+    padding: 10px 8px; text-align: center;
+    font-size: 0.78rem; font-weight: 600;
+    color: #6b7280; letter-spacing: 0.04em;
+    border-right: 1px solid var(--border-color);
+}
+.agenda-day-header .day-label:first-child { border-right: 1px solid var(--border-color); }
+.agenda-day-header .day-label.today {
+    background: #fff1f2; color: var(--primary-color);
+    font-weight: 700;
+}
+.agenda-day-header .day-label span { display: block; font-size: 1.2rem; font-weight: 700; color: #111827; }
+.agenda-day-header .day-label.today span { color: var(--primary-color); }
+
+/* Linhas de horário */
+.time-label {
+    padding: 0 6px; text-align: right; font-size: 0.7rem;
+    color: #9ca3af; border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid #f3f4f6;
+    height: 44px; display: flex; align-items: flex-start;
+    padding-top: 4px; position: relative; top: -7px;
+}
+
+.agenda-slot {
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid #f3f4f6;
+    height: 44px; position: relative;
+    cursor: pointer; transition: background 0.1s;
+}
+.agenda-slot:hover { background: #fff8f9; }
+.agenda-slot:last-child { border-right: none; }
+
+/* Eventos */
+.agenda-event {
+    position: absolute; left: 2px; right: 2px;
+    top: 2px; border-radius: 6px;
+    padding: 3px 6px; font-size: 0.72rem; font-weight: 600;
+    line-height: 1.3; cursor: pointer; overflow: hidden;
+    white-space: nowrap; text-overflow: ellipsis;
+    z-index: 2; color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: opacity 0.15s, transform 0.1s;
+}
+.agenda-event:hover { opacity: 0.9; transform: scale(1.01); }
+.agenda-event .ev-paciente { font-weight: 700; display: block; }
+.agenda-event .ev-prof { opacity: 0.9; font-size: 0.68rem; }
+
+/* Status badges */
+.badge { display: inline-flex; align-items: center; gap: 4px;
+    padding:2px 8px; border-radius: 999px; font-size:0.75rem; font-weight:600; }
+.badge-agendado   { background:#dbeafe; color:#1d4ed8; }
+.badge-confirmado { background:#d1fae5; color:#065f46; }
+.badge-realizado  { background:#ede9fe; color:#5b21b6; }
+.badge-cancelado  { background:#f3f4f6; color:#6b7280; }
+
+/* ── Modal ── */
+.modal-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4); z-index: 500;
+    align-items: center; justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+
+.modal-box {
+    background: #fff; border-radius: var(--radius-md);
+    padding: 28px; width: 100%; max-width: 520px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    animation: modalIn 0.2s ease;
+    max-height: 90vh; overflow-y: auto;
+}
+@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(-10px); } to { opacity:1; transform:none; } }
+
+.modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+}
+.modal-header h3 { margin: 0; font-size: 1.1rem; }
+.modal-close {
+    background: none; border: none; font-size: 1.4rem;
+    cursor: pointer; color: #9ca3af; line-height: 1;
+    transition: color 0.15s;
+}
+.modal-close:hover { color: #374151; }
+
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-full { grid-column: 1 / -1; }
+
+.modal-actions {
+    display: flex; justify-content: flex-end; gap: 8px;
+    margin-top: 20px; padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+.btn-danger {
+    padding: 8px 18px; border-radius: var(--radius-full);
+    border: 1px solid #fecaca; background: #fff;
+    color: #dc2626; font-weight:500; font-size:0.9rem;
+    cursor:pointer; transition: all 0.15s;
+}
+.btn-danger:hover { background:#fef2f2; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if mensagem %}
+<div class="msg-alerta" style="background:#d1fae5;border-color:#10b981;color:#065f46;">{{ mensagem }}</div>
+{% endif %}
+{% if erro %}
+<div class="msg-alerta" style="background:#fee2e2;border-color:#ef4444;color:#991b1b;">{{ erro }}</div>
+{% endif %}
+
+<div class="agenda-wrapper">
+
+    {# ── Toolbar ── #}
+    <div class="agenda-toolbar">
+        <div class="agenda-nav">
+            <a href="?semana={{ semanaAnterior|date('o-\\WW') }}{% if filtroProf %}&profissional_id={{ filtroProf }}{% endif %}">← Anterior</a>
+            <a href="?">Hoje</a>
+            <a href="?semana={{ semanaProxima|date('o-\\WW') }}{% if filtroProf %}&profissional_id={{ filtroProf }}{% endif %}">Próxima →</a>
+        </div>
+
+        <h2>
+            {{ inicio|date('d/m') }} – {{ fim|date('d/m/Y') }}
+        </h2>
+
+        {# Filtro por profissional #}
+        <form method="get" style="display:flex;gap:8px;align-items:center;">
+            <select name="profissional_id" class="filter-select" onchange="this.form.submit()">
+                <option value="">Todos os profissionais</option>
+                {% for p in profissionais %}
+                    <option value="{{ p.id }}" {% if filtroProf == p.id %}selected{% endif %}>
+                        {{ p.nome }}
+                    </option>
+                {% endfor %}
+            </select>
+            <input type="hidden" name="semana" value="{{ inicio|date('o-\\WW') }}">
+        </form>
+
+        <button class="btn-primary" onclick="openModal()">+ Novo</button>
+    </div>
+
+    {# ── Grade ── #}
+    <div class="agenda-grid-wrapper">
+        <div class="agenda-grid">
+
+            {# Cabeçalho #}
+            <div class="agenda-day-header">
+                <div class="day-label" style="border-right:1px solid var(--border-color);">&nbsp;</div>
+                {% set dias = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'] %}
+                {% for offset in 0..6 %}
+                    {% set dia = inicio|date_modify('+' ~ offset ~ ' days') %}
+                    {% set isToday = dia|date('Y-m-d') == "now"|date('Y-m-d') %}
+                    <div class="day-label {{ isToday ? 'today' : '' }}"
+                         data-date="{{ dia|date('Y-m-d') }}">
+                        {{ dias[offset] }}
+                        <span>{{ dia|date('d') }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# Linhas de 07:00 a 20:00 #}
+            {% for hora in 7..19 %}
+                {% for meia in [0, 30] %}
+                    <div class="time-label">
+                        {{ hora|number_format(0) }}:{{ meia == 0 ? '00' : '30' }}
+                    </div>
+
+                    {% for offset in 0..6 %}
+                        {% set dia = inicio|date_modify('+' ~ offset ~ ' days') %}
+                        {% set diaStr = dia|date('Y-m-d') %}
+                        {% set slotHora = hora ~ ':' ~ (meia == 0 ? '00' : '30') %}
+
+                        <div class="agenda-slot"
+                             data-date="{{ diaStr }}"
+                             data-hora="{{ hora|number_format(0, '.', '') ~ ':' ~ (meia == 0 ? '00' : '30') }}"
+                             onclick="openModalSlot(this)">
+
+                            {# Eventos neste slot #}
+                            {% if porDia[diaStr] is defined %}
+                                {% for ev in porDia[diaStr] %}
+                                    {% set evHora = ev.data_inicio|slice(11, 5) %}
+                                    {% if evHora == (hora|number_format(0, '.', '') ~ ':' ~ (meia == 0 ? '00' : '30')) %}
+                                        <div class="agenda-event"
+                                             style="background-color:{{ ev.profissional_cor|default('#6366f1') }};"
+                                             onclick="event.stopPropagation(); openModalEdit({{ ev|json_encode|e('html_attr') }})"
+                                             title="{{ ev.paciente }} — {{ ev.profissional_nome }}">
+                                            <span class="ev-paciente">{{ ev.paciente }}</span>
+                                            <span class="ev-prof">{{ ev.profissional_nome }} {{ ev.sala_nome ? '· ' ~ ev.sala_nome : '' }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+
+        </div>{# /agenda-grid #}
+    </div>{# /agenda-grid-wrapper #}
+
+</div>{# /agenda-wrapper #}
+
+{# ══ Modal Criar / Editar ══ #}
+<div class="modal-backdrop" id="agendaModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">Novo Agendamento</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+
+        <form method="post" action="{{ base_url }}/agenda" id="agendaForm">
+            {{ csrfField() }}
+            <input type="hidden" name="action" id="modalAction" value="create">
+            <input type="hidden" name="id"     id="modalId"     value="">
+
+            <div class="modal-grid">
+                <div class="modal-full flex-col">
+                    <label>Paciente *</label>
+                    <input type="text" name="paciente" id="modalPaciente" required placeholder="Nome do paciente">
+                </div>
+
+                <div class="flex-col">
+                    <label>Profissional *</label>
+                    <select name="profissional_id" id="modalProf" required>
+                        <option value="">Selecione</option>
+                        {% for p in profissionais %}
+                            <option value="{{ p.id }}" data-cor="{{ p.cor_agenda }}">{{ p.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="flex-col">
+                    <label>Sala</label>
+                    <select name="sala_id" id="modalSala">
+                        <option value="">— sem sala —</option>
+                        {% for s in salas %}
+                            <option value="{{ s.id }}">{{ s.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="flex-col">
+                    <label>Data e Hora *</label>
+                    <input type="datetime-local" name="data_inicio" id="modalDataInicio" required step="1800">
+                </div>
+
+                <div class="flex-col">
+                    <label>Duração (min)</label>
+                    <select name="duracao" id="modalDuracao">
+                        <option value="30">30 min</option>
+                        <option value="60" selected>60 min</option>
+                        <option value="90">90 min</option>
+                        <option value="120">2 horas</option>
+                    </select>
+                </div>
+
+                <div class="flex-col">
+                    <label>Status</label>
+                    <select name="status" id="modalStatus">
+                        <option value="Agendado">Agendado</option>
+                        <option value="Confirmado">Confirmado</option>
+                        <option value="Realizado">Realizado</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="modal-full flex-col">
+                    <label>Observações</label>
+                    <textarea name="observacoes" id="modalObs" rows="2" placeholder="Observações opcionais"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeModal()">Cancelar</button>
+                <span id="cancelBtn" style="display:none;">
+                    <button type="button" class="btn-danger" onclick="submitCancel()">Cancelar Agendamento</button>
+                </span>
+                <button type="submit" class="btn-primary" id="modalSubmitBtn">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const modal = document.getElementById('agendaModal');
+
+function openModal() {
+    document.getElementById('modalTitle').textContent   = 'Novo Agendamento';
+    document.getElementById('modalAction').value        = 'create';
+    document.getElementById('modalId').value            = '';
+    document.getElementById('modalPaciente').value      = '';
+    document.getElementById('modalProf').value          = '';
+    document.getElementById('modalSala').value          = '';
+    document.getElementById('modalDataInicio').value    = '';
+    document.getElementById('modalDuracao').value       = '60';
+    document.getElementById('modalStatus').value        = 'Agendado';
+    document.getElementById('modalObs').value           = '';
+    document.getElementById('cancelBtn').style.display  = 'none';
+    modal.classList.add('open');
+    document.getElementById('modalPaciente').focus();
+}
+
+function openModalSlot(el) {
+    openModal();
+    const date  = el.dataset.date;
+    const hora  = el.dataset.hora.padStart(5, '0');
+    document.getElementById('modalDataInicio').value = date + 'T' + hora;
+}
+
+function openModalEdit(ev) {
+    document.getElementById('modalTitle').textContent  = 'Editar Agendamento';
+    document.getElementById('modalAction').value       = 'update';
+    document.getElementById('modalId').value           = ev.id;
+    document.getElementById('modalPaciente').value     = ev.paciente;
+    document.getElementById('modalProf').value         = ev.profissional_id;
+    document.getElementById('modalSala').value         = ev.sala_id || '';
+    // data_inicio: "2025-03-05 09:00:00" → "2025-03-05T09:00"
+    document.getElementById('modalDataInicio').value   = ev.data_inicio.replace(' ', 'T').slice(0, 16);
+    document.getElementById('modalStatus').value       = ev.status;
+    document.getElementById('modalObs').value          = ev.observacoes || '';
+    document.getElementById('cancelBtn').style.display = 'inline-block';
+    modal.classList.add('open');
+}
+
+function closeModal() { modal.classList.remove('open'); }
+
+function submitCancel() {
+    if (!confirm('Cancelar este agendamento?')) return;
+    document.getElementById('modalAction').value = 'cancel';
+    document.getElementById('agendaForm').submit();
+}
+
+// Fechar clicando fora do modal
+modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeModal();
+});
+
+// Atalho ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
+{% endblock %}
