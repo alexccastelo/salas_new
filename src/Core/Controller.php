@@ -30,6 +30,7 @@ class Controller
                     'pacotes' => \Clinica\Core\Auth::hasPermission('pacotes'),
                     'profissionais' => \Clinica\Core\Auth::hasPermission('profissionais'),
                     'salas' => \Clinica\Core\Auth::hasPermission('salas'),
+                    'servicos' => \Clinica\Core\Auth::hasPermission('servicos'),
                     'usuarios' => \Clinica\Core\Auth::hasPermission('usuarios'),
                     'relatorios' => \Clinica\Core\Auth::hasPermission('relatorios'),
                 ];

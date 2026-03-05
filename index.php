@@ -61,6 +61,10 @@ $router->post('/profissionais', [\Clinica\Controllers\ProfessionalController::cl
 $router->get('/salas', [\Clinica\Controllers\RoomController::class, 'index']);
 $router->post('/salas', [\Clinica\Controllers\RoomController::class, 'index']);
 
+// Serviços
+$router->get('/servicos', [\Clinica\Controllers\ServiceController::class, 'index']);
+$router->post('/servicos', [\Clinica\Controllers\ServiceController::class, 'index']);
+
 // Usuários
 $router->get('/usuarios', [\Clinica\Controllers\UserController::class, 'index']);
 $router->post('/usuarios', [\Clinica\Controllers\UserController::class, 'index']);

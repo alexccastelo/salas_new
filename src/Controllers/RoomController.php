@@ -5,6 +5,7 @@ namespace Clinica\Controllers;
 use Clinica\Core\Controller;
 use Clinica\Core\Auth;
 use Clinica\Models\Room;
+use Clinica\Models\Service;
 
 class RoomController extends Controller
 {
@@ -15,6 +16,7 @@ class RoomController extends Controller
         $mensagem = '';
         $erro = '';
         $editando = null;
+        $servicosVinculados = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             \Clinica\Helpers\Csrf::requireValidation();
@@ -31,41 +33,53 @@ class RoomController extends Controller
         if (isset($_GET['edit'])) {
             $id = (int) $_GET['edit'];
             $editando = Room::find($id);
+            if ($editando) {
+                $servicosVinculados = Room::getServicoIds($id);
+            }
         }
 
         $this->view('rooms/index', [
             'salas' => Room::allIncludingInactive(),
+            'servicos' => Service::all(),
             'editando' => $editando,
+            'servicosVinculados' => $servicosVinculados,
             'mensagem' => $mensagem,
             'erro' => $erro
         ]);
     }
 
+    private function extractData()
+    {
+        return [
+            'nome' => trim($_POST['nome'] ?? ''),
+            'descricao' => trim($_POST['descricao'] ?? ''),
+            'capacidade' => $_POST['capacidade'] ?? '',
+            'cor_agenda' => $_POST['cor_agenda'] ?? '#10B981',
+            'servicos' => $_POST['servicos'] ?? [],
+            'ativo' => isset($_POST['ativo']) ? 1 : 0,
+        ];
+    }
+
     private function handleCreate(&$mensagem, &$erro)
     {
-        $nome = trim($_POST['nome'] ?? '');
-
-        if ($nome === '') {
+        $data = $this->extractData();
+        if ($data['nome'] === '') {
             $erro = 'Nome é obrigatório.';
             return;
         }
-
-        Room::create($nome);
+        Room::create($data);
         $mensagem = 'Sala cadastrada com sucesso.';
     }
 
     private function handleUpdate(&$mensagem, &$erro)
     {
         $id = (int) ($_POST['id'] ?? 0);
-        $nome = trim($_POST['nome'] ?? '');
-        $ativo = isset($_POST['ativo']) ? 1 : 0;
-
-        if ($id <= 0 || $nome === '') {
+        $data = $this->extractData();
+        if ($id <= 0 || $data['nome'] === '') {
             $erro = 'Dados inválidos.';
             return;
         }
-
-        Room::update($id, $nome, $ativo);
+        Room::update($id, $data);
         $mensagem = 'Sala atualizada.';
     }
 
@@ -76,8 +90,6 @@ class RoomController extends Controller
             $erro = 'ID inválido.';
             return;
         }
-
-        // Soft delete
         Room::delete($id);
         $mensagem = 'Sala desativada.';
     }

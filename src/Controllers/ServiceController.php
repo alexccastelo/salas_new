@@ -4,13 +4,13 @@ namespace Clinica\Controllers;
 
 use Clinica\Core\Controller;
 use Clinica\Core\Auth;
-use Clinica\Models\Professional;
+use Clinica\Models\Service;
 
-class ProfessionalController extends Controller
+class ServiceController extends Controller
 {
     public function index()
     {
-        Auth::requirePermission('profissionais');
+        Auth::requirePermission('servicos');
 
         $mensagem = '';
         $erro = '';
@@ -30,11 +30,12 @@ class ProfessionalController extends Controller
 
         if (isset($_GET['edit'])) {
             $id = (int) $_GET['edit'];
-            $editando = Professional::find($id);
+            $editando = Service::find($id);
         }
 
-        $this->view('professionals/index', [
-            'profissionais' => Professional::allIncludingInactive(),
+        $this->view('services/index', [
+            'servicos' => Service::allIncludingInactive(),
+            'todos_servicos' => Service::all(), // para select de vínculo
             'editando' => $editando,
             'mensagem' => $mensagem,
             'erro' => $erro
@@ -45,16 +46,15 @@ class ProfessionalController extends Controller
     {
         return [
             'nome' => trim($_POST['nome'] ?? ''),
-            'celular' => trim($_POST['celular'] ?? ''),
-            'email' => trim($_POST['email'] ?? ''),
-            'chave_pix' => trim($_POST['chave_pix'] ?? ''),
-            'profissao' => trim($_POST['profissao'] ?? ''),
+            'descricao' => trim($_POST['descricao'] ?? ''),
             'especialidade' => trim($_POST['especialidade'] ?? ''),
-            'conselho' => trim($_POST['conselho'] ?? ''),
-            'numero_conselho' => trim($_POST['numero_conselho'] ?? ''),
-            'tipo_contrato' => $_POST['tipo_contrato'] ?? '',
-            'percentual_repasse' => $_POST['percentual_repasse'] ?? '',
-            'cor_agenda' => $_POST['cor_agenda'] ?? '#3B82F6',
+            'tempo_atendimento' => $_POST['tempo_atendimento'] ?? 60,
+            'quantidade_sessoes' => $_POST['quantidade_sessoes'] ?? '',
+            'servico_vinculado_id' => $_POST['servico_vinculado_id'] ?? '',
+            'valor_base' => $_POST['valor_base'] ?? '',
+            'valor_avista' => $_POST['valor_avista'] ?? '',
+            'valor_prazo' => $_POST['valor_prazo'] ?? '',
+            'qtd_parcelas' => $_POST['qtd_parcelas'] ?? '',
             'ativo' => isset($_POST['ativo']) ? 1 : 0,
         ];
     }
@@ -62,28 +62,24 @@ class ProfessionalController extends Controller
     private function handleCreate(&$mensagem, &$erro)
     {
         $data = $this->extractData();
-
         if ($data['nome'] === '') {
-            $erro = 'Nome é obrigatório.';
+            $erro = 'Nome do serviço é obrigatório.';
             return;
         }
-
-        Professional::create($data);
-        $mensagem = 'Profissional cadastrado com sucesso.';
+        Service::create($data);
+        $mensagem = 'Serviço cadastrado com sucesso.';
     }
 
     private function handleUpdate(&$mensagem, &$erro)
     {
         $id = (int) ($_POST['id'] ?? 0);
         $data = $this->extractData();
-
         if ($id <= 0 || $data['nome'] === '') {
             $erro = 'Dados inválidos.';
             return;
         }
-
-        Professional::update($id, $data);
-        $mensagem = 'Profissional atualizado.';
+        Service::update($id, $data);
+        $mensagem = 'Serviço atualizado.';
     }
 
     private function handleDelete(&$mensagem, &$erro)
@@ -93,8 +89,7 @@ class ProfessionalController extends Controller
             $erro = 'ID inválido.';
             return;
         }
-
-        Professional::delete($id);
-        $mensagem = 'Profissional desativado.';
+        Service::delete($id);
+        $mensagem = 'Serviço desativado.';
     }
 }

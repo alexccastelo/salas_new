@@ -33,10 +33,48 @@
                 <input type="hidden" name="id" value="{{ editando.id }}">
             {% endif %}
 
-            <div class="flex-col" style="margin-bottom:12px;">
-                <label>Nome da Sala</label>
-                <input type="text" name="nome" required value="{{ editando.nome|default('') }}">
-            </div>
+            {# ─── Dados da Sala ─── #}
+            <fieldset style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:16px;">
+                <legend style="font-weight:600; color:#374151; padding:0 8px;">Dados da Sala</legend>
+
+                <div class="flex-col" style="margin-bottom:12px;">
+                    <label>Nome da Sala *</label>
+                    <input type="text" name="nome" required value="{{ editando.nome|default('') }}">
+                </div>
+
+                <div class="flex-col" style="margin-bottom:12px;">
+                    <label>Descrição</label>
+                    <textarea name="descricao" rows="2" style="resize:vertical;">{{ editando.descricao|default('') }}</textarea>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="flex-col">
+                        <label>Capacidade (pessoas)</label>
+                        <input type="number" name="capacidade" min="1" value="{{ editando.capacidade|default('') }}">
+                    </div>
+                    <div class="flex-col">
+                        <label>Cor na Agenda</label>
+                        <input type="color" name="cor_agenda" value="{{ editando.cor_agenda|default('#10B981') }}" style="height:38px; padding:2px;">
+                    </div>
+                </div>
+            </fieldset>
+
+            {# ─── Serviços Permitidos ─── #}
+            {% if servicos is not empty %}
+            <fieldset style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:16px;">
+                <legend style="font-weight:600; color:#374151; padding:0 8px;">Serviços Permitidos</legend>
+                <p style="font-size:0.85rem; color:#6b7280; margin-bottom:10px;">Selecione os tipos de atendimento possíveis nesta sala:</p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    {% for s in servicos %}
+                        <label style="display:flex; gap:6px; align-items:center; font-size:0.9rem;">
+                            <input type="checkbox" name="servicos[]" value="{{ s.id }}" style="width:auto; margin:0;"
+                                {{ s.id in servicosVinculados ? 'checked' : '' }}>
+                            {{ s.nome }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+            {% endif %}
 
             {% if editando %}
                 <div style="margin-bottom:12px;">
@@ -64,17 +102,26 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style="width:30px;"></th>
                         <th>Nome</th>
+                        <th>Capacidade</th>
                         <th>Status</th>
                         <th style="text-align:right;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for s in salas %}
-                        <tr style="{{ s.ativo ? '' : 'opacity:0.6;' }}">
-                            <td>{{ s.id }}</td>
-                            <td>{{ s.nome }}</td>
+                        <tr style="{{ s.ativo ? '' : 'opacity:0.5;' }}">
+                            <td>
+                                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:{{ s.cor_agenda|default('#10B981') }};"></span>
+                            </td>
+                            <td>
+                                <strong>{{ s.nome }}</strong>
+                                {% if s.descricao %}
+                                    <br><small style="color:#6b7280;">{{ s.descricao }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ s.capacidade|default('—') }} {{ s.capacidade ? 'pessoas' : '' }}</td>
                             <td>
                                 <span style="font-size:0.8rem; padding:2px 6px; border-radius:4px; background:{{ s.ativo ? '#d1fae5' : '#f3f4f6' }}; color:{{ s.ativo ? '#065f46' : '#6b7280' }};">
                                     {{ s.ativo ? 'Ativa' : 'Inativa' }}

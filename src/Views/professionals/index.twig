@@ -33,10 +33,83 @@
                 <input type="hidden" name="id" value="{{ editando.id }}">
             {% endif %}
 
-            <div class="flex-col" style="margin-bottom:12px;">
-                <label>Nome do Profissional</label>
-                <input type="text" name="nome" required value="{{ editando.nome|default('') }}">
-            </div>
+            {# ─── Dados Pessoais ─── #}
+            <fieldset style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:16px;">
+                <legend style="font-weight:600; color:#374151; padding:0 8px;">Dados Pessoais</legend>
+
+                <div class="flex-col" style="margin-bottom:12px;">
+                    <label>Nome do Profissional *</label>
+                    <input type="text" name="nome" required value="{{ editando.nome|default('') }}">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="flex-col">
+                        <label>Celular</label>
+                        <input type="text" name="celular" placeholder="(00) 00000-0000" value="{{ editando.celular|default('') }}">
+                    </div>
+                    <div class="flex-col">
+                        <label>E-mail</label>
+                        <input type="email" name="email" placeholder="email@exemplo.com" value="{{ editando.email|default('') }}">
+                    </div>
+                </div>
+
+                <div class="flex-col" style="margin-bottom:12px;">
+                    <label>Chave PIX</label>
+                    <input type="text" name="chave_pix" placeholder="CPF, e-mail, celular ou chave aleatória" value="{{ editando.chave_pix|default('') }}">
+                </div>
+            </fieldset>
+
+            {# ─── Dados Profissionais ─── #}
+            <fieldset style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:16px;">
+                <legend style="font-weight:600; color:#374151; padding:0 8px;">Dados Profissionais</legend>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="flex-col">
+                        <label>Profissão</label>
+                        <input type="text" name="profissao" placeholder="Ex: Psicóloga" value="{{ editando.profissao|default('') }}">
+                    </div>
+                    <div class="flex-col">
+                        <label>Especialidade</label>
+                        <input type="text" name="especialidade" placeholder="Ex: Neuropsicologia" value="{{ editando.especialidade|default('') }}">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="flex-col">
+                        <label>Conselho</label>
+                        <input type="text" name="conselho" placeholder="Ex: CRP" value="{{ editando.conselho|default('') }}">
+                    </div>
+                    <div class="flex-col">
+                        <label>Nº no Conselho</label>
+                        <input type="text" name="numero_conselho" placeholder="Ex: 11/12345" value="{{ editando.numero_conselho|default('') }}">
+                    </div>
+                </div>
+            </fieldset>
+
+            {# ─── Contrato e Financeiro ─── #}
+            <fieldset style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:16px;">
+                <legend style="font-weight:600; color:#374151; padding:0 8px;">Contrato e Financeiro</legend>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="flex-col">
+                        <label>Tipo de Contrato</label>
+                        <select name="tipo_contrato">
+                            <option value="">Selecione</option>
+                            <option value="PJ" {{ editando.tipo_contrato|default('') == 'PJ' ? 'selected' : '' }}>PJ</option>
+                            <option value="CLT" {{ editando.tipo_contrato|default('') == 'CLT' ? 'selected' : '' }}>CLT</option>
+                            <option value="Eventual" {{ editando.tipo_contrato|default('') == 'Eventual' ? 'selected' : '' }}>Eventual</option>
+                        </select>
+                    </div>
+                    <div class="flex-col">
+                        <label>% Repasse</label>
+                        <input type="number" name="percentual_repasse" step="0.01" min="0" max="100" placeholder="0.00" value="{{ editando.percentual_repasse|default('') }}">
+                    </div>
+                    <div class="flex-col">
+                        <label>Cor na Agenda</label>
+                        <input type="color" name="cor_agenda" value="{{ editando.cor_agenda|default('#3B82F6') }}" style="height:38px; padding:2px;">
+                    </div>
+                </div>
+            </fieldset>
 
             {% if editando %}
                 <div style="margin-bottom:12px;">
@@ -64,17 +137,36 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style="width:30px;"></th>
                         <th>Nome</th>
+                        <th>Profissão</th>
+                        <th>Contrato</th>
                         <th>Status</th>
                         <th style="text-align:right;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for p in profissionais %}
-                        <tr style="{{ p.ativo ? '' : 'opacity:0.6;' }}">
-                            <td>{{ p.id }}</td>
-                            <td>{{ p.nome }}</td>
+                        <tr style="{{ p.ativo ? '' : 'opacity:0.5;' }}">
+                            <td>
+                                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:{{ p.cor_agenda|default('#3B82F6') }};"></span>
+                            </td>
+                            <td>
+                                <strong>{{ p.nome }}</strong>
+                                {% if p.especialidade %}
+                                    <br><small style="color:#6b7280;">{{ p.especialidade }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ p.profissao|default('—') }}</td>
+                            <td>
+                                {% if p.tipo_contrato %}
+                                    <span style="font-size:0.75rem; padding:2px 8px; border-radius:4px; background:#e0e7ff; color:#3730a3;">
+                                        {{ p.tipo_contrato }}
+                                    </span>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
                             <td>
                                 <span style="font-size:0.8rem; padding:2px 6px; border-radius:4px; background:{{ p.ativo ? '#d1fae5' : '#f3f4f6' }}; color:{{ p.ativo ? '#065f46' : '#6b7280' }};">
                                     {{ p.ativo ? 'Ativo' : 'Inativo' }}

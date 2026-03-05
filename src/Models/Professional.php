@@ -21,32 +21,76 @@ class Professional
         return $stmt->fetchAll();
     }
 
-    public static function create($nome)
+    public static function create($data)
     {
         $pdo = Database::getInstance()->getConnection();
-        $stmt = $pdo->prepare("INSERT INTO profissionais (nome, ativo) VALUES (:nome, 1)");
-        $stmt->execute([':nome' => $nome]);
+        $stmt = $pdo->prepare("
+            INSERT INTO profissionais 
+            (nome, celular, email, chave_pix, profissao, especialidade, conselho, numero_conselho, tipo_contrato, percentual_repasse, cor_agenda, ativo)
+            VALUES 
+            (:nome, :celular, :email, :chave_pix, :profissao, :especialidade, :conselho, :numero_conselho, :tipo_contrato, :percentual_repasse, :cor_agenda, 1)
+        ");
+        $stmt->execute([
+            ':nome' => $data['nome'],
+            ':celular' => $data['celular'] ?: null,
+            ':email' => $data['email'] ?: null,
+            ':chave_pix' => $data['chave_pix'] ?: null,
+            ':profissao' => $data['profissao'] ?: null,
+            ':especialidade' => $data['especialidade'] ?: null,
+            ':conselho' => $data['conselho'] ?: null,
+            ':numero_conselho' => $data['numero_conselho'] ?: null,
+            ':tipo_contrato' => $data['tipo_contrato'] ?: null,
+            ':percentual_repasse' => $data['percentual_repasse'] !== '' ? $data['percentual_repasse'] : null,
+            ':cor_agenda' => $data['cor_agenda'] ?: '#3B82F6',
+        ]);
         return $pdo->lastInsertId();
     }
 
-    public static function update($id, $nome, $ativo = 1)
+    public static function update($id, $data)
     {
         $pdo = Database::getInstance()->getConnection();
-        $stmt = $pdo->prepare("UPDATE profissionais SET nome = :nome, ativo = :ativo WHERE id = :id");
+        $stmt = $pdo->prepare("
+            UPDATE profissionais SET 
+                nome = :nome,
+                celular = :celular,
+                email = :email,
+                chave_pix = :chave_pix,
+                profissao = :profissao,
+                especialidade = :especialidade,
+                conselho = :conselho,
+                numero_conselho = :numero_conselho,
+                tipo_contrato = :tipo_contrato,
+                percentual_repasse = :percentual_repasse,
+                cor_agenda = :cor_agenda,
+                ativo = :ativo
+            WHERE id = :id
+        ");
         return $stmt->execute([
-            ':nome' => $nome,
-            ':ativo' => $ativo,
-            ':id' => $id
+            ':nome' => $data['nome'],
+            ':celular' => $data['celular'] ?: null,
+            ':email' => $data['email'] ?: null,
+            ':chave_pix' => $data['chave_pix'] ?: null,
+            ':profissao' => $data['profissao'] ?: null,
+            ':especialidade' => $data['especialidade'] ?: null,
+            ':conselho' => $data['conselho'] ?: null,
+            ':numero_conselho' => $data['numero_conselho'] ?: null,
+            ':tipo_contrato' => $data['tipo_contrato'] ?: null,
+            ':percentual_repasse' => $data['percentual_repasse'] !== '' ? $data['percentual_repasse'] : null,
+            ':cor_agenda' => $data['cor_agenda'] ?: '#3B82F6',
+            ':ativo' => $data['ativo'] ?? 1,
+            ':id' => $id,
         ]);
     }
 
     public static function delete($id)
     {
-        // Soft delete (mark as inactive) or hard delete if not used?
-        // Plan said toggle active, but let's allow hard delete if no records exist, else soft.
-        // For simplicity, let's just toggle active in the update, or provide a specific toggle method.
-        // Let's implement a 'delete' that actually marks as inactive for safety.
-        return self::update($id, self::find($id)['nome'], 0);
+        $prof = self::find($id);
+        if ($prof) {
+            $pdo = Database::getInstance()->getConnection();
+            $stmt = $pdo->prepare("UPDATE profissionais SET ativo = 0 WHERE id = :id");
+            return $stmt->execute([':id' => $id]);
+        }
+        return false;
     }
 
     public static function find($id)

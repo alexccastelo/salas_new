@@ -16,6 +16,7 @@ class UserController extends Controller
         'relatorios' => 'Relatórios',
         'profissionais' => 'Profissionais',
         'salas' => 'Salas',
+        'servicos' => 'Serviços',
         'usuarios' => 'Administração de usuários',
     ];
 

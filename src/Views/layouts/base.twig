@@ -40,7 +40,7 @@
                     class="{{ currentRoute == 'relatorios' ? 'active' : '' }}">Relatórios</a>
 
                 <div class="nav-item-dropdown">
-                    <a href="#" class="dropdown-toggle {{ currentRoute in ['profissionais', 'salas', 'usuarios'] ? 'active' : '' }}" onclick="return false;">
+                    <a href="#" class="dropdown-toggle {{ currentRoute in ['profissionais', 'salas', 'servicos', 'usuarios'] ? 'active' : '' }}" onclick="return false;">
                         Cadastros <span style="font-size: 0.8em; margin-left: 2px;">▼</span>
                     </a>
                     <div class="dropdown-menu">
@@ -51,6 +51,10 @@
                         <a href="{{ permissions.salas ? base_url ~ '/salas' : '#' }}"
                             onclick="{{ permissions.salas ? '' : "alert('Acesso negado'); return false;" }}"
                             class="{{ currentRoute == 'salas' ? 'active' : '' }}">Salas</a>
+
+                        <a href="{{ permissions.servicos ? base_url ~ '/servicos' : '#' }}"
+                            onclick="{{ permissions.servicos ? '' : "alert('Acesso negado'); return false;" }}"
+                            class="{{ currentRoute == 'servicos' ? 'active' : '' }}">Serviços</a>
 
                         <a href="{{ permissions.usuarios ? base_url ~ '/usuarios' : '#' }}"
                             onclick="{{ permissions.usuarios ? '' : "alert('Acesso negado'); return false;" }}"
