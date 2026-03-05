@@ -10,3 +10,4 @@ test_env.php
 .phpunit.cache/
 salas_new.zip
 src/views.zip
+/.phpunit.cache/
