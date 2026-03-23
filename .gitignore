@@ -2,6 +2,7 @@
 /.env
 /*.sqlite
 /*.db
+/*.zip
 /*.db-journal
 .DS_Store
 __MACOSX/
