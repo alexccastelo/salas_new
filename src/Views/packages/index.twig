@@ -171,6 +171,14 @@
 
     <div class="card">
         <h2>Pacotes Existentes</h2>
+
+        <form method="get" action="{{ base_url }}/pacotes" class="flex-row" style="margin-bottom: 20px; align-items: center; gap: 10px;">
+            <input type="text" name="busca" placeholder="Buscar por paciente, profissional ou data..." value="{{ busca|default('') }}" style="flex: 1; margin: 0;">
+            <button type="submit" class="btn-primary" style="margin: 0;">Buscar</button>
+            {% if busca %}
+                <a href="{{ base_url }}/pacotes" class="btn-link">Limpar</a>
+            {% endif %}
+        </form>
         {% if pacotes is empty %}
             <p>Nenhum pacote cadastrado.</p>
         {% else %}
@@ -204,7 +212,7 @@
                                 </td>
                                 <td>{{ p.usadas }} / {{ p.quantidade }}</td>
                                 <td>
-                                    <a href="{{ base_url }}/pacotes?id={{ p.id }}" class="btn-link">Ver/Usar</a>
+                                    <a href="{{ base_url }}/pacotes?id={{ p.id }}&pagina={{ paginaAtual|default(1) }}&busca={{ busca|default('')|url_encode }}" class="btn-link">Ver/Usar</a>
                                     &nbsp;|&nbsp;
                                     <form method="post" action="{{ base_url }}/pacotes" style="display:inline;"
                                         onsubmit="return confirm('Excluir?');">
@@ -220,6 +228,17 @@
                     </tbody>
                 </table>
             </div>
+
+            {% if totalPaginas > 1 %}
+                <div class="pagination" style="margin-top: 20px; display: flex; gap: 5px;">
+                    {% for i in 1..totalPaginas %}
+                        <a href="{{ base_url }}/pacotes?pagina={{ i }}&busca={{ busca|default('')|url_encode }}" 
+                           style="padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; {% if i == paginaAtual|default(1) %}background: #007bff; color: #fff; border-color: #007bff;{% else %}background: #f9f9f9; color: #333;{% endif %}">
+                            {{ i }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 {% endif %}

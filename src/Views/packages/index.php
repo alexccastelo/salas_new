@@ -166,6 +166,16 @@
 
             <div class="card">
                 <h2>Pacotes Existentes</h2>
+
+                <form method="get" action="index.php" class="flex-row" style="margin-bottom: 20px; align-items: center; gap: 10px;">
+                    <input type="hidden" name="route" value="pacotes">
+                    <input type="text" name="busca" placeholder="Buscar por paciente, profissional ou data..." value="<?= htmlspecialchars($busca ?? '') ?>" style="flex: 1; margin: 0;">
+                    <button type="submit" class="btn-primary" style="margin: 0;">Buscar</button>
+                    <?php if (!empty($busca)): ?>
+                        <a href="index.php?route=pacotes" class="btn-link">Limpar</a>
+                    <?php endif; ?>
+                </form>
+
                 <?php if (empty($pacotes)): ?>
                     <p>Nenhum pacote cadastrado.</p>
                 <?php else: ?>
@@ -202,7 +212,7 @@
                                             <?= $p['quantidade'] ?>
                                         </td>
                                         <td>
-                                            <a href="index.php?route=pacotes&id=<?= $p['id'] ?>" class="btn-link">Ver/Usar</a>
+                                            <a href="index.php?route=pacotes&id=<?= $p['id'] ?>&pagina=<?= $paginaAtual ?? 1 ?>&busca=<?= urlencode($busca ?? '') ?>" class="btn-link">Ver/Usar</a>
                                             &nbsp;|&nbsp;
                                             <form method="post" action="index.php?route=pacotes" style="display:inline;"
                                                 onsubmit="return confirm('Excluir?');">
@@ -217,6 +227,17 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <?php if (isset($totalPaginas) && $totalPaginas > 1): ?>
+                        <div class="pagination" style="margin-top: 20px; display: flex; gap: 5px;">
+                            <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                                <a href="index.php?route=pacotes&pagina=<?= $i ?>&busca=<?= urlencode($busca ?? '') ?>" 
+                                   style="padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; <?= $i === ($paginaAtual ?? 1) ? 'background: #007bff; color: #fff; border-color: #007bff;' : 'background: #f9f9f9; color: #333;' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

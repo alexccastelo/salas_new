@@ -154,16 +154,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->query("SELECT id, nome FROM profissionais WHERE ativo = 1 ORDER BY nome ASC");
 $profissionais = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Lista de pacotes com quantidade usada
-$stmt = $pdo->query("
+// Busca e paginação
+$busca = trim($_GET['busca'] ?? '');
+$paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+if ($paginaAtual < 1) $paginaAtual = 1;
+$itensPorPagina = 5;
+$offset = ($paginaAtual - 1) * $itensPorPagina;
+
+$where = "WHERE 1=1";
+$params = [];
+
+if ($busca !== '') {
+    $where .= " AND (
+        p.contratante_nome LIKE :busca OR
+        p.profissional_relacionado LIKE :busca OR
+        p.paciente_relacionado LIKE :busca OR
+        DATE_FORMAT(p.data_contrato, '%d/%m/%Y') LIKE :busca OR
+        p.data_contrato LIKE :busca OR
+        DATE_FORMAT(p.data_pagamento, '%d/%m/%Y') LIKE :busca OR
+        p.data_pagamento LIKE :busca
+    )";
+    $params[':busca'] = '%' . $busca . '%';
+}
+
+// Contar o total para paginação
+$sqlCount = "SELECT COUNT(DISTINCT p.id) FROM pacotes p $where";
+$stmtCount = $pdo->prepare($sqlCount);
+$stmtCount->execute($params);
+$totalItens = (int)$stmtCount->fetchColumn();
+$totalPaginas = ceil($totalItens / $itensPorPagina);
+
+// Lista de pacotes com quantidade usada (com paginação)
+$sqlPacotes = "
     SELECT
         p.*,
         COALESCE(SUM(CASE WHEN pp.utilizado = 1 THEN 1 ELSE 0 END), 0) AS usadas
     FROM pacotes p
     LEFT JOIN pacotes_parcelas pp ON pp.pacote_id = p.id
+    $where
     GROUP BY p.id
     ORDER BY p.data_contrato DESC, p.id DESC
-");
+    LIMIT $itensPorPagina OFFSET $offset
+";
+$stmt = $pdo->prepare($sqlPacotes);
+$stmt->execute($params);
 $pacotes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Pacote selecionado para ver detalhes/parcelas
@@ -297,8 +331,16 @@ function formatarDataBR(?string $data): string
     <div class="card">
         <h2>Pacotes cadastrados</h2>
 
+        <form method="get" class="flex-row" style="margin-bottom: 20px; align-items: center; gap: 10px;">
+            <input type="text" name="busca" placeholder="Buscar por paciente, profissional ou data..." value="<?= htmlspecialchars($busca) ?>" style="flex: 1; margin: 0;">
+            <button type="submit" style="margin: 0;">Buscar</button>
+            <?php if ($busca !== ''): ?>
+                <a href="pacotes.php" class="btn-link">Limpar</a>
+            <?php endif; ?>
+        </form>
+
         <?php if (empty($pacotes)): ?>
-            <p>Não há pacotes cadastrados.</p>
+            <p>Nenhum pacote encontrado.</p>
         <?php else: ?>
             <table>
                 <thead>
@@ -343,7 +385,7 @@ function formatarDataBR(?string $data): string
                         <td><?= htmlspecialchars(number_format((float)$p['valor_total'], 2, ',', '.')) ?></td>
                         <td><?= (int)$p['usadas'] . '/' . (int)$p['quantidade'] ?></td>
                         <td>
-                            <a class="btn-link" href="pacotes.php?id=<?= (int)$p['id'] ?>">Detalhes</a>
+                            <a class="btn-link" href="pacotes.php?id=<?= (int)$p['id'] ?>&pagina=<?= $paginaAtual ?>&busca=<?= urlencode($busca) ?>">Detalhes</a>
                             |
                             <form method="post" class="actions-form"
                                   onsubmit="return confirm('Tem certeza que deseja excluir este pacote?');">
@@ -356,6 +398,17 @@ function formatarDataBR(?string $data): string
                 <?php endforeach; ?>
                 </tbody>
             </table>
+
+            <?php if ($totalPaginas > 1): ?>
+                <div class="pagination" style="margin-top: 20px; display: flex; gap: 5px;">
+                    <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                        <a href="?pagina=<?= $i ?>&busca=<?= urlencode($busca) ?>" 
+                           style="padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; <?= $i === $paginaAtual ? 'background: #007bff; color: #fff; border-color: #007bff;' : 'background: #f9f9f9; color: #333;' ?>">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 

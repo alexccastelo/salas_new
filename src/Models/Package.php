@@ -23,6 +23,67 @@ class Package
         return $stmt->fetchAll();
     }
 
+    public static function getPaginatedAndFiltered($busca, $limit, $offset)
+    {
+        $pdo = Database::getInstance()->getConnection();
+        
+        $where = "WHERE 1=1";
+        $params = [];
+
+        if ($busca !== '') {
+            $where .= " AND (
+                p.contratante_nome LIKE :busca OR
+                p.profissional_relacionado LIKE :busca OR
+                p.paciente_relacionado LIKE :busca OR
+                DATE_FORMAT(p.data_contrato, '%d/%m/%Y') LIKE :busca OR
+                p.data_contrato LIKE :busca OR
+                DATE_FORMAT(p.data_pagamento, '%d/%m/%Y') LIKE :busca OR
+                p.data_pagamento LIKE :busca
+            )";
+            $params[':busca'] = '%' . $busca . '%';
+        }
+
+        $sqlPacotes = "
+            SELECT
+                p.*,
+                COALESCE(SUM(CASE WHEN pp.utilizado = 1 THEN 1 ELSE 0 END), 0) AS usadas
+            FROM pacotes p
+            LEFT JOIN pacotes_parcelas pp ON pp.pacote_id = p.id
+            $where
+            GROUP BY p.id
+            ORDER BY p.data_contrato DESC, p.id DESC
+            LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+
+        $stmt = $pdo->prepare($sqlPacotes);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    public static function countFiltered($busca)
+    {
+        $pdo = Database::getInstance()->getConnection();
+        $where = "WHERE 1=1";
+        $params = [];
+
+        if ($busca !== '') {
+            $where .= " AND (
+                p.contratante_nome LIKE :busca OR
+                p.profissional_relacionado LIKE :busca OR
+                p.paciente_relacionado LIKE :busca OR
+                DATE_FORMAT(p.data_contrato, '%d/%m/%Y') LIKE :busca OR
+                p.data_contrato LIKE :busca OR
+                DATE_FORMAT(p.data_pagamento, '%d/%m/%Y') LIKE :busca OR
+                p.data_pagamento LIKE :busca
+            )";
+            $params[':busca'] = '%' . $busca . '%';
+        }
+
+        $sqlCount = "SELECT COUNT(DISTINCT p.id) FROM pacotes p $where";
+        $stmtCount = $pdo->prepare($sqlCount);
+        $stmtCount->execute($params);
+        return (int)$stmtCount->fetchColumn();
+    }
+
     public static function find($id)
     {
         $pdo = Database::getInstance()->getConnection();

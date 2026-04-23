@@ -42,13 +42,26 @@ class PackageController extends Controller
             }
         }
 
+        $busca = trim($_GET['busca'] ?? '');
+        $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+        if ($paginaAtual < 1) $paginaAtual = 1;
+        $itensPorPagina = 5;
+        $offset = ($paginaAtual - 1) * $itensPorPagina;
+
+        $totalItens = Package::countFiltered($busca);
+        $totalPaginas = ceil($totalItens / $itensPorPagina);
+        $pacotes = Package::getPaginatedAndFiltered($busca, $itensPorPagina, $offset);
+
         $this->view('packages/index', [
-            'pacotes' => Package::all(),
+            'pacotes' => $pacotes,
             'profissionais' => Professional::all(),
             'pacoteSelecionado' => $pacoteSelecionado,
             'parcelasPacote' => $parcelasPacote,
             'mensagem' => $mensagem,
-            'erro' => $erro
+            'erro' => $erro,
+            'busca' => $busca,
+            'paginaAtual' => $paginaAtual,
+            'totalPaginas' => $totalPaginas
         ]);
     }
 
