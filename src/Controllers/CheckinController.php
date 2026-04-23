@@ -33,17 +33,22 @@ class CheckinController extends Controller
         }
 
         // Prepare data for View
-        $finalizadosPage = max(1, (int) ($_GET['page'] ?? 1));
+        $busca = trim($_GET['busca'] ?? '');
+        $finalizadosPage = max(1, (int) ($_GET['pagina'] ?? $_GET['page'] ?? 1));
         $porPagina = 5;
         $offset = ($finalizadosPage - 1) * $porPagina;
+
+        $totalItens = Registry::countFinished($busca);
+        $totalPaginas = ceil($totalItens / $porPagina);
 
         $data = [
             'profissionais' => Professional::all(),
             'salas' => Room::all(),
             'abertos' => Registry::getOpen(),
-            'finalizados' => Registry::getFinished($porPagina, $offset),
-            'totalPaginas' => ceil(Registry::countFinished() / $porPagina),
+            'finalizados' => Registry::getFinished($porPagina, $offset, $busca),
+            'totalPaginas' => $totalPaginas,
             'paginaAtual' => $finalizadosPage,
+            'busca' => $busca,
             'mensagemSistema' => $mensagemSistema,
             'mensagemWhatsApp' => $mensagemWhatsApp,
             'erro' => $erro

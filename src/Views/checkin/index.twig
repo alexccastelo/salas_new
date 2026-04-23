@@ -134,8 +134,17 @@
 <!-- FINALIZADOS -->
 <div class="card" style="margin-top:16px;">
     <h2>Últimos Finalizados</h2>
+
+    <form method="get" action="{{ base_url }}/checkin" class="flex-row" style="margin-bottom: 20px; align-items: center; gap: 10px;">
+        <input type="text" name="busca" placeholder="Buscar por profissional, sala ou data..." value="{{ busca|default('') }}" style="flex: 1; margin: 0;">
+        <button type="submit" class="btn-primary" style="margin: 0;">Buscar</button>
+        {% if busca %}
+            <a href="{{ base_url }}/checkin" class="btn-link">Limpar</a>
+        {% endif %}
+    </form>
+
     {% if finalizados is empty %}
-        <p class="info">Nenhum registro finalizado.</p>
+        <p class="info">Nenhum registro finalizado encontrado.</p>
     {% else %}
         <div style="overflow-x:auto;">
             <table>
@@ -170,15 +179,40 @@
 
         <!-- Pagination -->
         {% if totalPaginas > 1 %}
-            <div class="pagination">
+            {% set totalPagesToShow = 5 %}
+            {% set half = (totalPagesToShow / 2)|round(0, 'floor') %}
+            {% set startPage = paginaAtual - half %}
+            {% set endPage = paginaAtual + half %}
+
+            {% if startPage < 1 %}
+                {% set startPage = 1 %}
+                {% set endPage = startPage + totalPagesToShow - 1 %}
+            {% endif %}
+
+            {% if endPage > totalPaginas %}
+                {% set endPage = totalPaginas %}
+                {% set startPage = endPage - totalPagesToShow + 1 %}
+                {% if startPage < 1 %}
+                    {% set startPage = 1 %}
+                {% endif %}
+            {% endif %}
+
+            <div class="pagination" style="margin-top: 20px; display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
                 {% if paginaAtual > 1 %}
-                    <a href="{{ base_url }}/checkin?page={{ paginaAtual - 1 }}">&laquo; Anterior</a>
+                    <a href="{{ base_url }}/checkin?pagina=1&busca={{ busca|default('')|url_encode }}" style="padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; background: #f9f9f9; color: #333;">&laquo; Primeira</a>
+                    <a href="{{ base_url }}/checkin?pagina={{ paginaAtual - 1 }}&busca={{ busca|default('')|url_encode }}" style="padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; background: #f9f9f9; color: #333;">&lsaquo; Ant</a>
                 {% endif %}
 
-                <span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>
+                {% for i in startPage..endPage %}
+                    <a href="{{ base_url }}/checkin?pagina={{ i }}&busca={{ busca|default('')|url_encode }}" 
+                       style="padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; {% if i == paginaAtual %}background: #007bff; color: #fff; border-color: #007bff;{% else %}background: #f9f9f9; color: #333;{% endif %}">
+                        {{ i }}
+                    </a>
+                {% endfor %}
 
                 {% if paginaAtual < totalPaginas %}
-                    <a href="{{ base_url }}/checkin?page={{ paginaAtual + 1 }}">Próximo &raquo;</a>
+                    <a href="{{ base_url }}/checkin?pagina={{ paginaAtual + 1 }}&busca={{ busca|default('')|url_encode }}" style="padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; background: #f9f9f9; color: #333;">Próx &rsaquo;</a>
+                    <a href="{{ base_url }}/checkin?pagina={{ totalPaginas }}&busca={{ busca|default('')|url_encode }}" style="padding: 5px 10px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; background: #f9f9f9; color: #333;">Última &raquo;</a>
                 {% endif %}
             </div>
         {% endif %}

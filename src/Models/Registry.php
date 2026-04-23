@@ -67,28 +67,70 @@ class Registry
         return $stmt->fetchAll();
     }
 
-    public static function getFinished($limit, $offset)
+    public static function getFinished($limit, $offset, $busca = '')
     {
         $pdo = Database::getInstance()->getConnection();
-        $stmt = $pdo->prepare("
+        
+        $where = "r.hora_checkout IS NOT NULL";
+        $params = [];
+        
+        if ($busca !== '') {
+            $where .= " AND (
+                p.nome LIKE :busca OR
+                s.nome LIKE :busca OR
+                DATE_FORMAT(r.data, '%d/%m/%Y') LIKE :busca OR
+                r.data LIKE :busca
+            )";
+            $params[':busca'] = '%' . $busca . '%';
+        }
+
+        $sql = "
             SELECT r.*, p.nome as profissional, s.nome as sala
             FROM registros r
             LEFT JOIN profissionais p ON r.profissional_id = p.id
             LEFT JOIN salas s ON r.sala_id = s.id
-            WHERE r.hora_checkout IS NOT NULL
+            WHERE $where
             ORDER BY r.data DESC, r.hora_checkin DESC
             LIMIT :limite OFFSET :offset
-        ");
-        $stmt->bindValue(':limite', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        ";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':limite', (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    public static function countFinished()
+    public static function countFinished($busca = '')
     {
         $pdo = Database::getInstance()->getConnection();
-        $stmt = $pdo->query("SELECT COUNT(*) FROM registros WHERE hora_checkout IS NOT NULL");
+        
+        $where = "r.hora_checkout IS NOT NULL";
+        $params = [];
+        
+        if ($busca !== '') {
+            $where .= " AND (
+                p.nome LIKE :busca OR
+                s.nome LIKE :busca OR
+                DATE_FORMAT(r.data, '%d/%m/%Y') LIKE :busca OR
+                r.data LIKE :busca
+            )";
+            $params[':busca'] = '%' . $busca . '%';
+        }
+
+        $sql = "
+            SELECT COUNT(*) 
+            FROM registros r
+            LEFT JOIN profissionais p ON r.profissional_id = p.id
+            LEFT JOIN salas s ON r.sala_id = s.id
+            WHERE $where
+        ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
         return (int) $stmt->fetchColumn();
     }
 
