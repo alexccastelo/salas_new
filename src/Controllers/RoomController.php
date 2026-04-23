@@ -51,12 +51,13 @@ class RoomController extends Controller
     private function extractData()
     {
         return [
-            'nome' => trim($_POST['nome'] ?? ''),
-            'descricao' => trim($_POST['descricao'] ?? ''),
-            'capacidade' => $_POST['capacidade'] ?? '',
-            'cor_agenda' => $_POST['cor_agenda'] ?? '#10B981',
-            'servicos' => $_POST['servicos'] ?? [],
-            'ativo' => isset($_POST['ativo']) ? 1 : 0,
+            'nome'               => trim($_POST['nome'] ?? ''),
+            'descricao'          => trim($_POST['descricao'] ?? ''),
+            'capacidade'         => $_POST['capacidade'] ?? '',
+            'cor_agenda'         => $_POST['cor_agenda'] ?? '#10B981',
+            'google_calendar_id' => trim($_POST['google_calendar_id'] ?? ''),
+            'servicos'           => $_POST['servicos'] ?? [],
+            'ativo'              => isset($_POST['ativo']) ? 1 : 0,
         ];
     }
 

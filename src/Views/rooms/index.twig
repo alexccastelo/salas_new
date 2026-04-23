@@ -57,6 +57,19 @@
                         <input type="color" name="cor_agenda" value="{{ editando.cor_agenda|default('#10B981') }}" style="height:38px; padding:2px;">
                     </div>
                 </div>
+
+                <div class="flex-col" style="margin-bottom:12px;">
+                    <label>ID da Agenda Google
+                        <span style="font-size:0.8rem; font-weight:400; color:#6b7280;">(opcional — sincronização com Google Calendar)</span>
+                    </label>
+                    <input type="text" name="google_calendar_id"
+                           value="{{ editando.google_calendar_id|default('') }}"
+                           placeholder="ex: abc123xyz@group.calendar.google.com"
+                           style="font-family: monospace; font-size: 0.85rem;">
+                    <small style="color:#6b7280; margin-top:4px;">
+                        Encontre em: Google Calendar → ⚙️ Configurações da agenda → ID da agenda
+                    </small>
+                </div>
             </fieldset>
 
             {# ─── Serviços Permitidos ─── #}

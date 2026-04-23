@@ -73,5 +73,9 @@ $router->post('/servicos', [\Clinica\Controllers\ServiceController::class, 'inde
 $router->get('/usuarios', [\Clinica\Controllers\UserController::class, 'index']);
 $router->post('/usuarios', [\Clinica\Controllers\UserController::class, 'index']);
 
+// Google Calendar OAuth
+$router->get('/google/auth', [\Clinica\Controllers\GoogleAuthController::class, 'auth']);
+$router->get('/google/callback', [\Clinica\Controllers\GoogleAuthController::class, 'callback']);
+
 // Dispatch
 $router->dispatch();

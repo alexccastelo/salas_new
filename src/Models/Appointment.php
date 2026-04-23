@@ -17,7 +17,8 @@ class Appointment
             SELECT a.*,
                    p.nome AS profissional_nome,
                    p.cor_agenda AS profissional_cor,
-                   s.nome AS sala_nome
+                   s.nome AS sala_nome,
+                   s.cor_agenda AS sala_cor
             FROM   agenda a
             LEFT JOIN profissionais p ON p.id = a.profissional_id
             LEFT JOIN salas         s ON s.id = a.sala_id
@@ -111,6 +112,32 @@ class Appointment
         $pdo = Database::getInstance()->getConnection();
         $stmt = $pdo->prepare("UPDATE agenda SET status = 'Cancelado' WHERE id = :id");
         return $stmt->execute([':id' => $id]);
+    }
+
+    public static function updateGoogleEventId(int $id, string $googleEventId): void
+    {
+        $pdo = Database::getInstance()->getConnection();
+        $stmt = $pdo->prepare("
+            UPDATE agenda
+               SET google_event_id = :google_event_id,
+                   google_synced_at = NOW()
+             WHERE id = :id
+        ");
+        $stmt->execute([':google_event_id' => $googleEventId, ':id' => $id]);
+    }
+
+    /** Retorna agendamentos ainda sem google_event_id (para re-sincronização manual). */
+    public static function findNotSynced(): array
+    {
+        $pdo = Database::getInstance()->getConnection();
+        $stmt = $pdo->prepare("
+            SELECT * FROM agenda
+             WHERE google_event_id IS NULL
+               AND status != 'Cancelado'
+             ORDER BY data_inicio ASC
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
     /** Conta agendamentos por status nesta semana */

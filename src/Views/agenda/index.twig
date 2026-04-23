@@ -234,7 +234,7 @@
                                     {% set evHora = ev.data_inicio|slice(11, 5) %}
                                     {% if evHora == (hora|number_format(0, '.', '') ~ ':' ~ (meia == 0 ? '00' : '30')) %}
                                         <div class="agenda-event"
-                                             style="background-color:{{ ev.profissional_cor|default('#6366f1') }};"
+                                             style="background-color:{{ ev.sala_cor ?? ev.profissional_cor ?? '#6366f1' }};"
                                              onclick="event.stopPropagation(); openModalEdit({{ ev|json_encode|e('html_attr') }})"
                                              title="{{ ev.paciente }} — {{ ev.profissional_nome }}">
                                             <span class="ev-paciente">{{ ev.paciente }}</span>

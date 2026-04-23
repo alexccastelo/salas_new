@@ -33,14 +33,15 @@ class Room
     {
         $pdo = Database::getInstance()->getConnection();
         $stmt = $pdo->prepare("
-            INSERT INTO salas (nome, descricao, capacidade, cor_agenda, ativo) 
-            VALUES (:nome, :descricao, :capacidade, :cor_agenda, 1)
+            INSERT INTO salas (nome, descricao, capacidade, cor_agenda, google_calendar_id, ativo)
+            VALUES (:nome, :descricao, :capacidade, :cor_agenda, :google_calendar_id, 1)
         ");
         $stmt->execute([
-            ':nome' => $data['nome'],
-            ':descricao' => $data['descricao'] ?: null,
-            ':capacidade' => $data['capacidade'] ?: null,
-            ':cor_agenda' => $data['cor_agenda'] ?: '#10B981',
+            ':nome'               => $data['nome'],
+            ':descricao'          => $data['descricao'] ?: null,
+            ':capacidade'         => $data['capacidade'] ?: null,
+            ':cor_agenda'         => $data['cor_agenda'] ?: '#10B981',
+            ':google_calendar_id' => trim($data['google_calendar_id'] ?? '') ?: null,
         ]);
         $salaId = $pdo->lastInsertId();
 
@@ -56,21 +57,23 @@ class Room
     {
         $pdo = Database::getInstance()->getConnection();
         $stmt = $pdo->prepare("
-            UPDATE salas SET 
-                nome = :nome,
-                descricao = :descricao,
-                capacidade = :capacidade,
-                cor_agenda = :cor_agenda,
-                ativo = :ativo
+            UPDATE salas SET
+                nome                = :nome,
+                descricao           = :descricao,
+                capacidade          = :capacidade,
+                cor_agenda          = :cor_agenda,
+                google_calendar_id  = :google_calendar_id,
+                ativo               = :ativo
             WHERE id = :id
         ");
         $stmt->execute([
-            ':nome' => $data['nome'],
-            ':descricao' => $data['descricao'] ?: null,
-            ':capacidade' => $data['capacidade'] ?: null,
-            ':cor_agenda' => $data['cor_agenda'] ?: '#10B981',
-            ':ativo' => $data['ativo'] ?? 1,
-            ':id' => $id,
+            ':nome'               => $data['nome'],
+            ':descricao'          => $data['descricao'] ?: null,
+            ':capacidade'         => $data['capacidade'] ?: null,
+            ':cor_agenda'         => $data['cor_agenda'] ?: '#10B981',
+            ':google_calendar_id' => trim($data['google_calendar_id'] ?? '') ?: null,
+            ':ativo'              => $data['ativo'] ?? 1,
+            ':id'                 => $id,
         ]);
 
         // Atualizar vínculo com serviços
@@ -84,6 +87,24 @@ class Room
         $pdo = Database::getInstance()->getConnection();
         $stmt = $pdo->prepare("UPDATE salas SET ativo = 0 WHERE id = :id");
         return $stmt->execute([':id' => $id]);
+    }
+
+    /**
+     * Retorna todos os google_calendar_id distintos configurados nas salas,
+     * mais o calendário padrão do .env, sem duplicatas e sem valores nulos.
+     */
+    public static function allGoogleCalendarIds(): array
+    {
+        $pdo = Database::getInstance()->getConnection();
+        $stmt = $pdo->query("SELECT DISTINCT google_calendar_id FROM salas WHERE google_calendar_id IS NOT NULL AND google_calendar_id != ''");
+        $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $default = $_ENV['GOOGLE_CALENDAR_ID'] ?? 'primary';
+        if (!in_array($default, $ids, true)) {
+            $ids[] = $default;
+        }
+
+        return $ids;
     }
 
     // Serviços vinculados

@@ -7,6 +7,7 @@ use Clinica\Core\Auth;
 use Clinica\Models\Appointment;
 use Clinica\Models\Professional;
 use Clinica\Models\Room;
+use Clinica\Services\GoogleCalendarService;
 
 class AppointmentController extends Controller
 {
@@ -54,7 +55,9 @@ class AppointmentController extends Controller
             } elseif ($action === 'cancel') {
                 $id = (int) ($_POST['id'] ?? 0);
                 if ($id > 0) {
+                    $existing = Appointment::find($id);
                     Appointment::cancel($id);
+                    $this->syncCancel($existing);
                     $mensagem = 'Agendamento cancelado.';
                 }
             }
@@ -119,7 +122,9 @@ class AppointmentController extends Controller
             $erro = 'Preencha profissional, paciente e data/hora.';
             return;
         }
-        Appointment::create($data);
+        $id = Appointment::create($data);
+        $data['id'] = $id;
+        $this->syncCreate($id, $data);
         $mensagem = 'Agendamento criado com sucesso.';
     }
 
@@ -132,6 +137,73 @@ class AppointmentController extends Controller
             return;
         }
         Appointment::update($id, $data);
+        $existing = Appointment::find($id);
+        $this->syncUpdate($existing);
         $mensagem = 'Agendamento atualizado.';
+    }
+
+    // ── Sincronização Google Calendar ────────────────────────────────────────
+
+    /** Resolve o google_calendar_id da sala do agendamento, ou retorna null para usar o padrão. */
+    private function resolveCalendarId(array $data): ?string
+    {
+        $salaId = (int) ($data['sala_id'] ?? 0);
+        if ($salaId > 0) {
+            $sala = Room::find($salaId);
+            if ($sala && !empty($sala['google_calendar_id'])) {
+                return $sala['google_calendar_id'];
+            }
+        }
+        return null; // GoogleCalendarService usará GOOGLE_CALENDAR_ID do .env
+    }
+
+    private function syncCreate(int $id, array $data): void
+    {
+        try {
+            $gcal = new GoogleCalendarService();
+            if (!$gcal->isAuthorized()) {
+                return;
+            }
+            $calendarId    = $this->resolveCalendarId($data);
+            $googleEventId = $gcal->createEvent($data, $calendarId);
+            Appointment::updateGoogleEventId($id, $googleEventId);
+        } catch (\Throwable $e) {
+            error_log('[GoogleCalendar] Erro ao criar evento: ' . $e->getMessage());
+        }
+    }
+
+    private function syncUpdate(array|false $appointment): void
+    {
+        if (!$appointment || empty($appointment['google_event_id'])) {
+            return;
+        }
+        try {
+            $gcal = new GoogleCalendarService();
+            if (!$gcal->isAuthorized()) {
+                return;
+            }
+            $calendarId = $this->resolveCalendarId($appointment);
+            $gcal->updateEvent($appointment['google_event_id'], $appointment, $calendarId);
+            Appointment::updateGoogleEventId((int) $appointment['id'], $appointment['google_event_id']);
+        } catch (\Throwable $e) {
+            error_log('[GoogleCalendar] Erro ao atualizar evento: ' . $e->getMessage());
+        }
+    }
+
+    private function syncCancel(array|false $appointment): void
+    {
+        if (!$appointment || empty($appointment['google_event_id'])) {
+            return;
+        }
+        try {
+            $gcal = new GoogleCalendarService();
+            if (!$gcal->isAuthorized()) {
+                return;
+            }
+            $calendarId = $this->resolveCalendarId($appointment);
+            $gcal->cancelEvent($appointment['google_event_id'], $calendarId);
+        } catch (\Throwable $e) {
+            error_log('[GoogleCalendar] Erro ao cancelar evento: ' . $e->getMessage());
+        }
     }
 }

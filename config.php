@@ -140,9 +140,10 @@ CREATE TABLE IF NOT EXISTS salas (
 
 // Adicionar colunas de salas caso já exista
 $alterSalas = [
-    'descricao' => "ALTER TABLE salas ADD COLUMN descricao TEXT DEFAULT NULL",
-    'capacidade' => "ALTER TABLE salas ADD COLUMN capacidade INT DEFAULT NULL",
-    'cor_agenda' => "ALTER TABLE salas ADD COLUMN cor_agenda VARCHAR(7) DEFAULT '#10B981'",
+    'descricao'           => "ALTER TABLE salas ADD COLUMN descricao TEXT DEFAULT NULL",
+    'capacidade'          => "ALTER TABLE salas ADD COLUMN capacidade INT DEFAULT NULL",
+    'cor_agenda'          => "ALTER TABLE salas ADD COLUMN cor_agenda VARCHAR(7) DEFAULT '#10B981'",
+    'google_calendar_id'  => "ALTER TABLE salas ADD COLUMN google_calendar_id VARCHAR(255) DEFAULT NULL",
 ];
 foreach ($alterSalas as $col => $sql) {
     try {
@@ -182,6 +183,48 @@ CREATE TABLE IF NOT EXISTS usuarios_modulos (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ");
 
+
+// Tabela de agendamentos (agenda)
+$pdo->exec("
+CREATE TABLE IF NOT EXISTS agenda (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    profissional_id INT DEFAULT NULL,
+    sala_id INT DEFAULT NULL,
+    paciente VARCHAR(255) NOT NULL,
+    servico_id INT DEFAULT NULL,
+    data_inicio DATETIME NOT NULL,
+    data_fim DATETIME NOT NULL,
+    duracao INT DEFAULT NULL COMMENT 'minutos',
+    status VARCHAR(50) NOT NULL DEFAULT 'Agendado',
+    observacoes TEXT DEFAULT NULL,
+    google_event_id VARCHAR(255) DEFAULT NULL,
+    google_synced_at DATETIME DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+");
+
+// Migração incremental: adicionar colunas Google se a tabela já existir
+$alterAgenda = [
+    'google_event_id'  => "ALTER TABLE agenda ADD COLUMN google_event_id VARCHAR(255) DEFAULT NULL",
+    'google_synced_at' => "ALTER TABLE agenda ADD COLUMN google_synced_at DATETIME DEFAULT NULL",
+    'created_at'       => "ALTER TABLE agenda ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+];
+foreach ($alterAgenda as $col => $sql) {
+    try {
+        $pdo->exec($sql);
+    } catch (PDOException $e) {
+        // Coluna já existe, ignorar
+    }
+}
+
+// Tabela de configurações gerais (chave-valor)
+$pdo->exec("
+CREATE TABLE IF NOT EXISTS config (
+    chave VARCHAR(100) NOT NULL,
+    valor TEXT DEFAULT NULL,
+    PRIMARY KEY (chave)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+");
 
 /*
  |---------------------------------------------------------

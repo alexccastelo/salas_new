@@ -1,0 +1,27 @@
+{% extends 'layouts/base.twig' %}
+
+{% block title %}Google Calendar{% endblock %}
+
+{% block content %}
+<div style="max-width:480px; margin:80px auto; text-align:center;">
+    {% if sucesso %}
+        <div style="background:#d1fae5; border:1px solid #6ee7b7; border-radius:8px; padding:32px;">
+            <div style="font-size:48px; margin-bottom:16px;">✅</div>
+            <h2 style="color:#065f46; margin:0 0 8px;">Conectado!</h2>
+            <p style="color:#047857; margin:0 0 24px;">{{ mensagem }}</p>
+            <a href="{{ base_url }}/agenda" style="background:#059669; color:#fff; padding:10px 24px; border-radius:6px; text-decoration:none;">
+                Ir para a Agenda
+            </a>
+        </div>
+    {% else %}
+        <div style="background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:32px;">
+            <div style="font-size:48px; margin-bottom:16px;">❌</div>
+            <h2 style="color:#991b1b; margin:0 0 8px;">Erro na conexão</h2>
+            <p style="color:#b91c1c; margin:0 0 24px;">{{ mensagem }}</p>
+            <a href="{{ base_url }}/google/auth" style="background:#dc2626; color:#fff; padding:10px 24px; border-radius:6px; text-decoration:none;">
+                Tentar novamente
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
